@@ -7,7 +7,7 @@
 -- serait en train de l'utiliser.
 USE master;
 GO
-
+--allo
 -- On supprime la base de données juste si elle existe.
 -- Cela évite une erreur si on a jamais exécuté le script.
 --DROP DATABASE IF EXISTS GestionInscriptEtudiant;
