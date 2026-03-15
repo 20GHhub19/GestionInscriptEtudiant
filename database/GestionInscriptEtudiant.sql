@@ -45,7 +45,7 @@ BEGIN
 
 	ALTER TABLE Etudiant
 	DROP CONSTRAINT FK_Etudiant_Programme
-
+	-- allo
 	ALTER TABLE CoursProgramme
 	DROP CONSTRAINT FK_CoursProgramme_Programme, FK_CoursProgramme_Cours
 
