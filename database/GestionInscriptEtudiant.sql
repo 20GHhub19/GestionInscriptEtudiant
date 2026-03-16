@@ -7,6 +7,7 @@
 -- serait en train de l'utiliser.
 USE master;
 GO
+
 -- On supprime la base de données juste si elle existe.
 -- Cela évite une erreur si on a jamais exécuté le script.
 --DROP DATABASE IF EXISTS GestionInscriptEtudiant;
@@ -33,7 +34,7 @@ IF EXISTS (
 	SELECT 1
 	FROM sys.foreign_keys
 	WHERE NAME = 'FK_Specialisation_Programme' OR NAME = 'FK_Etudiant_Programme' OR NAME = 'FK_CoursProgramme_Programme' OR NAME = 'FK_CoursProgramme_Cours' 
-			OR NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis' OR NAME = 'FK_CoursOffert_Cours' OR NAME = 'FK_SessionExamen_Semestre' 
+			OR NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis' OR NAME = 'FK_CoursOffert_Cours' OR NAME = 'FK_CoursOffert_Semestre' OR NAME = 'FK_SessionExamen_Semestre' 
 			OR NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_Semestre' OR NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
 			OR NAME = 'FK_Inscription_Etudiant' OR NAME = 'FK_Inscription_CoursOffert' OR NAME = 'FK_Note_Inscription' OR NAME = 'FK_Note_Evaluation'
 			OR NAME = 'FK_Restreindre_Specialisation' OR NAME = 'FK_Restreindre_Cours' OR NAME = 'FK_Enseigner_Professeur' OR NAME = 'FK_Enseigner_CoursOffert'
@@ -52,7 +53,7 @@ BEGIN
 	DROP CONSTRAINT FK_CoursPrerequis_Cours, FK_CoursPrerequis_Prerequis;
 
 	ALTER TABLE CoursOffert
-	DROP CONSTRAINT FK_CoursOffert_Cours;
+	DROP CONSTRAINT FK_CoursOffert_Cours, FK_CoursOffert_Semestre;
 
 	ALTER TABLE SessionExamen
 	DROP CONSTRAINT FK_SessionExamen_Semestre;
@@ -119,8 +120,7 @@ CREATE TABLE Programme (
 INSERT INTO Programme(code_Prog, nom_Prog, descript_Prog, nbCredit_Prog, unite_Prog, duree_Prog)
 VALUES
 ('INF01','Informatique','Programme informatique',90,'Departement TI',3),
-('NET01','Reseaux','Programme reseaux',60,'Departement TI',2),
-('DAT01','Science des donnees','Programme analyse donnees',75,'Departement TI',3);
+('NET01','Reseaux','Programme reseaux',60,'Departement TI',2);
 
 -- 2-) Table Spécialisation
 
@@ -190,14 +190,6 @@ CREATE TABLE Cours (
 	CONSTRAINT PK_Cours PRIMARY KEY(id_Cours)
 )
 
-INSERT INTO Cours (code_Cours, nom_Cours, credit_Cours, type_Cours, nbHeure_Cours)
-VALUES
-('IFT101','Introduction a la programmation',3,'Théorique',45),
-('IFT202','Bases de donnees',4,'Laboratoire',60),
-('IFT310','Developpement Web',3,'Travaux Pratiques',45),
-('IFT220','Structures de donnees',3,'Théorique',45),
-('IFT330','Intelligence artificielle',3,'Théorique',45);
-
 -- 5 Création de la table CoursProgramme
 
 CREATE TABLE CoursProgramme (
@@ -208,18 +200,6 @@ CREATE TABLE CoursProgramme (
 	CONSTRAINT FK_CoursProgramme_Programme FOREIGN KEY(id_Prog) REFERENCES Programme(id_Prog),
 	CONSTRAINT FK_CoursProgramme_Cours FOREIGN KEY (id_Cours) REFERENCES Cours(id_Cours)
 )
-
-INSERT INTO CoursProgramme (id_Prog, id_Cours)
-VALUES
-(1000,1),
-(1000,2),
-(1000,3),
-(1000,4),
-(1001,2),
-(1001,4),
-(1002,2),
-(1002,3),
-(1002,5);
 
 -- 6- Création de la table CoursPrerequis
 
@@ -232,13 +212,19 @@ CREATE TABLE CoursPrerequis (
 	CONSTRAINT FK_CoursPrerequis_Prerequis FOREIGN KEY(id_Prerequis) REFERENCES Cours(id_Cours)
 )
 
-INSERT INTO CoursPrerequis (id_Cours, id_Prerequis)
-VALUES
-(4,1), -- Structures de données nécessite Intro programmation
-(2,1), -- Bases de données nécessite Intro programmation
-(5,4); -- Intelligence artificielle nécessite Structures de données
+-- 7-) Création de la table Semestre
 
--- 7- Création de la table CoursOffert
+CREATE TABLE Semestre (
+	id_Semest INT IDENTITY (1, 1),
+	nom_Semest VARCHAR(20) NOT NULL,
+	annee_Semest VARCHAR(20) NOT NULL,
+	datDeb_Semest DATE NOT NULL,
+	dateFin_Semest DATE,
+	CONSTRAINT UQ_Semestre_nom_annee UNIQUE(nom_Semest, annee_Semest),
+	CONSTRAINT PK_Semestre PRIMARY KEY(id_Semest)
+)
+
+-- 8- Création de la table CoursOffert
 
 CREATE TABLE CoursOffert (
 	id_CoursOf INT IDENTITY(1, 1),
@@ -250,21 +236,11 @@ CREATE TABLE CoursOffert (
 	dateFin_CourOf DATE,
 	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Présentiel',
 	id_Cours INT NOT NULL,
+	id_Semest INT NOT NULL,
 	CONSTRAINT CK_CoursOf_mondeEns_CoursOf CHECK (mondeEns_CoursOf IN ('Présentiel', 'Asynchrone', 'En ligne', 'Bimodal')),
 	CONSTRAINT PK_CoursOffert PRIMARY KEY(id_CoursOf),
-	CONSTRAINT FK_CoursOffert_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours)
-)
-
--- 8-) Création de la table Semestre
-
-CREATE TABLE Semestre (
-	id_Semest INT IDENTITY (1, 1),
-	nom_Semest VARCHAR(20) NOT NULL,
-	annee_Semest VARCHAR(20) NOT NULL,
-	datDeb_Semest DATE NOT NULL,
-	dateFin_Semest DATE,
-	CONSTRAINT UQ_Semestre_nom_annee UNIQUE(nom_Semest, annee_Semest),
-	CONSTRAINT PK_Semestre PRIMARY KEY(id_Semest)
+	CONSTRAINT FK_CoursOffert_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours),
+	CONSTRAINT FK_CoursOffert_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest)
 )
 
 -- 9) Création de la table SessionExamen
