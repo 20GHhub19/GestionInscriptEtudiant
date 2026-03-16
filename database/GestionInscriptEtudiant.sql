@@ -205,7 +205,7 @@ CREATE TABLE CoursProgramme (
 	id_Prog INT NOT NULL,
 	id_Cours INT NOT NULL,
 	CONSTRAINT PK_CoursProgramme PRIMARY KEY(id_CoursProg),
-	CONSTRAINT FK_CoursProgramme_Programme FOREIGN KEY(id_Cours) REFERENCES Programme(id_Prog),
+	CONSTRAINT FK_CoursProgramme_Programme FOREIGN KEY(id_Prog) REFERENCES Programme(id_Prog),
 	CONSTRAINT FK_CoursProgramme_Cours FOREIGN KEY (id_Cours) REFERENCES Cours(id_Cours)
 )
 
@@ -248,7 +248,7 @@ CREATE TABLE CoursOffert (
 	salle_CoursOf VARCHAR(15),
 	dateDeb_CourOf DATE,
 	dateFin_CourOf DATE,
-	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Presentiel',
+	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Présentiel',
 	id_Cours INT NOT NULL,
 	CONSTRAINT CK_CoursOf_mondeEns_CoursOf CHECK (mondeEns_CoursOf IN ('Présentiel', 'Asynchrone', 'En ligne', 'Bimodal')),
 	CONSTRAINT PK_CoursOffert PRIMARY KEY(id_CoursOf),
@@ -291,7 +291,7 @@ CREATE TABLE Evaluation (
 	descript_Eval VARCHAR(100),
 	id_CoursOf INT NOT NULL,
 	id_Semest INT NOT NULL,
-	CONSTRAINT CK_Evaluation_type_Eval CHECK(type_Eval IN ('Travaux Pratiques%', 'Intra', 'Quiz', 'Examen final')),
+	CONSTRAINT CK_Evaluation_type_Eval CHECK(type_Eval IN ('Travaux Pratiques', 'Intra', 'Quiz', 'Examen final')),
 	CONSTRAINT PK_Evaluation PRIMARY KEY(id_Eval),
 	CONSTRAINT FK_Evaluation_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
 	CONSTRAINT FK_Evaluation_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest)
