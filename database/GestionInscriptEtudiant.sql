@@ -35,7 +35,7 @@ IF EXISTS (
 	FROM sys.foreign_keys
 	WHERE NAME = 'FK_Specialisation_Programme' OR NAME = 'FK_Etudiant_Programme' OR NAME = 'FK_CoursProgramme_Programme' OR NAME = 'FK_CoursProgramme_Cours' 
 			OR NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis' OR NAME = 'FK_CoursOffert_Cours' OR NAME = 'FK_CoursOffert_Semestre' OR NAME = 'FK_SessionExamen_Semestre' 
-			OR NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_Semestre' OR NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
+			OR NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_SessionExamen' OR NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
 			OR NAME = 'FK_Inscription_Etudiant' OR NAME = 'FK_Inscription_CoursOffert' OR NAME = 'FK_Note_Inscription' OR NAME = 'FK_Note_Evaluation'
 			OR NAME = 'FK_Restreindre_Specialisation' OR NAME = 'FK_Restreindre_Cours' OR NAME = 'FK_Enseigner_Professeur' OR NAME = 'FK_Enseigner_CoursOffert'
 )
@@ -59,7 +59,7 @@ BEGIN
 	DROP CONSTRAINT FK_SessionExamen_Semestre;
 
 	ALTER TABLE Evaluation
-	DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_Semestre;
+	DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_SessionExamen;
 
 	ALTER TABLE ChoixSpecialisation
 	DROP CONSTRAINT FK_ChoixSpecialisation_Etudiant, FK_ChoixSpecialisation_Specialisation;
@@ -266,11 +266,11 @@ CREATE TABLE Evaluation (
 	poids_Eval DECIMAL(4, 2),
 	descript_Eval VARCHAR(100),
 	id_CoursOf INT NOT NULL,
-	id_Semest INT NOT NULL,
+	id_SessExam INT NOT NULL,
 	CONSTRAINT CK_Evaluation_type_Eval CHECK(type_Eval IN ('Travaux Pratiques', 'Intra', 'Quiz', 'Examen final')),
 	CONSTRAINT PK_Evaluation PRIMARY KEY(id_Eval),
 	CONSTRAINT FK_Evaluation_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
-	CONSTRAINT FK_Evaluation_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest)
+	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam)
 )
 
 -- 11-) Création de la table Professeur
