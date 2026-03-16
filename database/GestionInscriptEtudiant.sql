@@ -182,8 +182,8 @@ VALUES (
 
 CREATE TABLE Cours (
 	id_Cours INT IDENTITY(1, 1) NOT NULL,
-	code_Cours VARCHAR(5) UNIQUE NOT NULL,
-	nom_Cours VARCHAR(30) NOT NULL,
+	code_Cours VARCHAR(10) UNIQUE NOT NULL,
+	nom_Cours VARCHAR(50) NOT NULL,
 	credit_Cours INT NOT NULL,
 	type_Cours VARCHAR (30) NOT NULL DEFAULT 'Théorique',
 	nbHeure_Cours INT,
