@@ -34,8 +34,8 @@ IF EXISTS (
 	SELECT 1
 	FROM sys.foreign_keys
 	WHERE NAME = 'FK_Specialisation_Programme' OR NAME = 'FK_Etudiant_Programme' OR NAME = 'FK_CoursProgramme_Programme' OR NAME = 'FK_CoursProgramme_Cours' 
-			OR NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis' OR NAME = 'FK_CoursOffert_Cours' OR NAME = 'FK_SessionExamen_Semestre' 
-			OR NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_Semestre' OR NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
+			OR NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis' OR NAME = 'FK_CoursOffert_Cours' OR NAME = 'FK_CoursOffert_Semestre' OR NAME = 'FK_SessionExamen_Semestre' 
+			OR NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_SessionExamen' OR NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
 			OR NAME = 'FK_Inscription_Etudiant' OR NAME = 'FK_Inscription_CoursOffert' OR NAME = 'FK_Note_Inscription' OR NAME = 'FK_Note_Evaluation'
 			OR NAME = 'FK_Restreindre_Specialisation' OR NAME = 'FK_Restreindre_Cours' OR NAME = 'FK_Enseigner_Professeur' OR NAME = 'FK_Enseigner_CoursOffert'
 )
@@ -53,13 +53,13 @@ BEGIN
 	DROP CONSTRAINT FK_CoursPrerequis_Cours, FK_CoursPrerequis_Prerequis;
 
 	ALTER TABLE CoursOffert
-	DROP CONSTRAINT FK_CoursOffert_Cours;
+	DROP CONSTRAINT FK_CoursOffert_Cours, FK_CoursOffert_Semestre;
 
 	ALTER TABLE SessionExamen
 	DROP CONSTRAINT FK_SessionExamen_Semestre;
 
 	ALTER TABLE Evaluation
-	DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_Semestre;
+	DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_SessionExamen;
 
 	ALTER TABLE ChoixSpecialisation
 	DROP CONSTRAINT FK_ChoixSpecialisation_Etudiant, FK_ChoixSpecialisation_Specialisation;
@@ -197,7 +197,7 @@ CREATE TABLE CoursProgramme (
 	id_Prog INT NOT NULL,
 	id_Cours INT NOT NULL,
 	CONSTRAINT PK_CoursProgramme PRIMARY KEY(id_CoursProg),
-	CONSTRAINT FK_CoursProgramme_Programme FOREIGN KEY(id_Cours) REFERENCES Programme(id_Prog),
+	CONSTRAINT FK_CoursProgramme_Programme FOREIGN KEY(id_Prog) REFERENCES Programme(id_Prog),
 	CONSTRAINT FK_CoursProgramme_Cours FOREIGN KEY (id_Cours) REFERENCES Cours(id_Cours)
 )
 
@@ -212,24 +212,7 @@ CREATE TABLE CoursPrerequis (
 	CONSTRAINT FK_CoursPrerequis_Prerequis FOREIGN KEY(id_Prerequis) REFERENCES Cours(id_Cours)
 )
 
--- 7- Création de la table CoursOffert
-
-CREATE TABLE CoursOffert (
-	id_CoursOf INT IDENTITY(1, 1),
-	sect_CoursOf VARCHAR(3) DEFAULT 'A',
-	capacite_CoursOf INT NOT NULL,
-	horaire_CoursOf VARCHAR(10) NOT NULL,
-	salle_CoursOf VARCHAR(15),
-	dateDeb_CourOf DATE,
-	dateFin_CourOf DATE,
-	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Presentiel',
-	id_Cours INT NOT NULL,
-	CONSTRAINT CK_CoursOf_mondeEns_CoursOf CHECK (mondeEns_CoursOf IN ('Présentiel', 'Asynchrone', 'En ligne', 'Bimodal')),
-	CONSTRAINT PK_CoursOffert PRIMARY KEY(id_CoursOf),
-	CONSTRAINT FK_CoursOffert_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours)
-)
-
--- 8-) Création de la table Semestre
+-- 7-) Création de la table Semestre
 
 CREATE TABLE Semestre (
 	id_Semest INT IDENTITY (1, 1),
@@ -239,6 +222,25 @@ CREATE TABLE Semestre (
 	dateFin_Semest DATE,
 	CONSTRAINT UQ_Semestre_nom_annee UNIQUE(nom_Semest, annee_Semest),
 	CONSTRAINT PK_Semestre PRIMARY KEY(id_Semest)
+)
+
+-- 8- Création de la table CoursOffert
+
+CREATE TABLE CoursOffert (
+	id_CoursOf INT IDENTITY(1, 1),
+	sect_CoursOf VARCHAR(3) DEFAULT 'A',
+	capacite_CoursOf INT NOT NULL,
+	horaire_CoursOf VARCHAR(10) NOT NULL,
+	salle_CoursOf VARCHAR(15),
+	dateDeb_CourOf DATE,
+	dateFin_CourOf DATE,
+	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Présentiel',
+	id_Cours INT NOT NULL,
+	id_Semest INT NOT NULL,
+	CONSTRAINT CK_CoursOf_mondeEns_CoursOf CHECK (mondeEns_CoursOf IN ('Présentiel', 'Asynchrone', 'En ligne', 'Bimodal')),
+	CONSTRAINT PK_CoursOffert PRIMARY KEY(id_CoursOf),
+	CONSTRAINT FK_CoursOffert_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours),
+	CONSTRAINT FK_CoursOffert_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest)
 )
 
 -- 9) Création de la table SessionExamen
@@ -264,11 +266,11 @@ CREATE TABLE Evaluation (
 	poids_Eval DECIMAL(4, 2),
 	descript_Eval VARCHAR(100),
 	id_CoursOf INT NOT NULL,
-	id_Semest INT NOT NULL,
-	CONSTRAINT CK_Evaluation_type_Eval CHECK(type_Eval IN ('Travaux Pratiques%', 'Intra', 'Quiz', 'Examen final')),
+	id_SessExam INT NOT NULL,
+	CONSTRAINT CK_Evaluation_type_Eval CHECK(type_Eval IN ('Travaux Pratiques', 'Intra', 'Quiz', 'Examen final')),
 	CONSTRAINT PK_Evaluation PRIMARY KEY(id_Eval),
 	CONSTRAINT FK_Evaluation_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
-	CONSTRAINT FK_Evaluation_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest)
+	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam)
 )
 
 -- 11-) Création de la table Professeur
@@ -322,6 +324,7 @@ CREATE TABLE Inscription (
 	id_Etud INT NOT NULL,
 	id_CoursOf INT NOT NULL,
 	CONSTRAINT PK_Inscription PRIMARY KEY(id_Inscript),
+	CONSTRAINT CK_Inscription_decisionFi CHECK(decisionFi_Inscript IN ('Réussi', 'Échoué', 'Abandon', 'Incomplet')),
 	CONSTRAINT FK_Inscription_Etudiant FOREIGN KEY(id_Etud) REFERENCES Etudiant(id_Etud),
 	CONSTRAINT FK_Inscription_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf)
 )
