@@ -324,6 +324,7 @@ CREATE TABLE Inscription (
 	id_Etud INT NOT NULL,
 	id_CoursOf INT NOT NULL,
 	CONSTRAINT PK_Inscription PRIMARY KEY(id_Inscript),
+	CONSTRAINT CK_Inscription_decisionFi CHECK(decisionFi_Inscript IN ('Réussi', 'Échoué', 'Abandon', 'Incomplet')),
 	CONSTRAINT FK_Inscription_Etudiant FOREIGN KEY(id_Etud) REFERENCES Etudiant(id_Etud),
 	CONSTRAINT FK_Inscription_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf)
 )
