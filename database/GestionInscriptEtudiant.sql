@@ -34,7 +34,7 @@ IF EXISTS (
 	SELECT 1
 	FROM sys.foreign_keys
 	WHERE NAME = 'FK_Specialisation_Programme' OR NAME = 'FK_Etudiant_Programme' OR NAME = 'FK_CoursProgramme_Programme' OR NAME = 'FK_CoursProgramme_Cours' 
-			OR NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis' OR NAME = 'FK_CoursOffert_Cours' OR NAME = 'FK_SessionExamen_Semestre' 
+			OR NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis' OR NAME = 'FK_CoursOffert_Cours' OR NAME = 'FK_CoursOffert_Semestre' OR NAME = 'FK_SessionExamen_Semestre' 
 			OR NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_Semestre' OR NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
 			OR NAME = 'FK_Inscription_Etudiant' OR NAME = 'FK_Inscription_CoursOffert' OR NAME = 'FK_Note_Inscription' OR NAME = 'FK_Note_Evaluation'
 			OR NAME = 'FK_Restreindre_Specialisation' OR NAME = 'FK_Restreindre_Cours' OR NAME = 'FK_Enseigner_Professeur' OR NAME = 'FK_Enseigner_CoursOffert'
@@ -53,7 +53,7 @@ BEGIN
 	DROP CONSTRAINT FK_CoursPrerequis_Cours, FK_CoursPrerequis_Prerequis;
 
 	ALTER TABLE CoursOffert
-	DROP CONSTRAINT FK_CoursOffert_Cours;
+	DROP CONSTRAINT FK_CoursOffert_Cours, FK_CoursOffert_Semestre;
 
 	ALTER TABLE SessionExamen
 	DROP CONSTRAINT FK_SessionExamen_Semestre;
@@ -212,7 +212,19 @@ CREATE TABLE CoursPrerequis (
 	CONSTRAINT FK_CoursPrerequis_Prerequis FOREIGN KEY(id_Prerequis) REFERENCES Cours(id_Cours)
 )
 
--- 7- Création de la table CoursOffert
+-- 7-) Création de la table Semestre
+
+CREATE TABLE Semestre (
+	id_Semest INT IDENTITY (1, 1),
+	nom_Semest VARCHAR(20) NOT NULL,
+	annee_Semest VARCHAR(20) NOT NULL,
+	datDeb_Semest DATE NOT NULL,
+	dateFin_Semest DATE,
+	CONSTRAINT UQ_Semestre_nom_annee UNIQUE(nom_Semest, annee_Semest),
+	CONSTRAINT PK_Semestre PRIMARY KEY(id_Semest)
+)
+
+-- 8- Création de la table CoursOffert
 
 CREATE TABLE CoursOffert (
 	id_CoursOf INT IDENTITY(1, 1),
@@ -224,21 +236,11 @@ CREATE TABLE CoursOffert (
 	dateFin_CourOf DATE,
 	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Présentiel',
 	id_Cours INT NOT NULL,
+	id_Semest INT NOT NULL,
 	CONSTRAINT CK_CoursOf_mondeEns_CoursOf CHECK (mondeEns_CoursOf IN ('Présentiel', 'Asynchrone', 'En ligne', 'Bimodal')),
 	CONSTRAINT PK_CoursOffert PRIMARY KEY(id_CoursOf),
-	CONSTRAINT FK_CoursOffert_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours)
-)
-
--- 8-) Création de la table Semestre
-
-CREATE TABLE Semestre (
-	id_Semest INT IDENTITY (1, 1),
-	nom_Semest VARCHAR(20) NOT NULL,
-	annee_Semest VARCHAR(20) NOT NULL,
-	datDeb_Semest DATE NOT NULL,
-	dateFin_Semest DATE,
-	CONSTRAINT UQ_Semestre_nom_annee UNIQUE(nom_Semest, annee_Semest),
-	CONSTRAINT PK_Semestre PRIMARY KEY(id_Semest)
+	CONSTRAINT FK_CoursOffert_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours),
+	CONSTRAINT FK_CoursOffert_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest)
 )
 
 -- 9) Création de la table SessionExamen
