@@ -120,10 +120,11 @@ CREATE TABLE Programme (
 INSERT INTO Programme(code_Prog, nom_Prog, descript_Prog, nbCredit_Prog, unite_Prog, duree_Prog)
 VALUES
 ('INF01','Informatique','Programme informatique',90,'Departement TI',3),
-('NET01','Reseaux','Programme reseaux',60,'Departement TI',2);
+('NET01','Reseaux','Programme reseaux',60,'Departement TI',2),
+('DAT01','Science des donnees','Programme analyse donnees',75,'Departement TI',3);
 
 -- 2-) Table Spécialisation
-
+ 
 CREATE TABLE Specialisation (
 	id_Spec INT IDENTITY(10, 1) NOT NULL,
 	nom_Spec VARCHAR (30) NOT NULL,
@@ -190,6 +191,14 @@ CREATE TABLE Cours (
 	CONSTRAINT PK_Cours PRIMARY KEY(id_Cours)
 )
 
+INSERT INTO Cours (code_Cours, nom_Cours, credit_Cours, type_Cours, nbHeure_Cours)
+VALUES
+('IFT101','Introduction a la programmation',3,'Théorique',45),
+('IFT202','Bases de donnees',4,'Laboratoire',60),
+('IFT310','Developpement Web',3,'Travaux Pratiques',45),
+('IFT220','Structures de donnees',3,'Théorique',45),
+('IFT330','Intelligence artificielle',3,'Théorique',45);
+
 -- 5 Création de la table CoursProgramme
 
 CREATE TABLE CoursProgramme (
@@ -201,6 +210,18 @@ CREATE TABLE CoursProgramme (
 	CONSTRAINT FK_CoursProgramme_Cours FOREIGN KEY (id_Cours) REFERENCES Cours(id_Cours)
 )
 
+INSERT INTO CoursProgramme (id_Prog, id_Cours)
+VALUES
+(1000,1),
+(1000,2),
+(1000,3),
+(1000,4),
+(1001,2),
+(1001,4),
+(1002,2),
+(1002,3),
+(1002,5);
+
 -- 6- Création de la table CoursPrerequis
 
 CREATE TABLE CoursPrerequis (
@@ -211,6 +232,12 @@ CREATE TABLE CoursPrerequis (
 	CONSTRAINT FK_CoursPrerequis_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours),
 	CONSTRAINT FK_CoursPrerequis_Prerequis FOREIGN KEY(id_Prerequis) REFERENCES Cours(id_Cours)
 )
+
+INSERT INTO CoursPrerequis (id_Cours, id_Prerequis)
+VALUES
+(4,1), -- Structures de données nécessite Intro programmation
+(2,1), -- Bases de données nécessite Intro programmation
+(5,4); -- Intelligence artificielle nécessite Structures de données
 
 -- 7-) Création de la table Semestre
 
