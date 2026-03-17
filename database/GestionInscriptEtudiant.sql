@@ -577,3 +577,180 @@ VALUES
 -- 15- Insertion dans la table Evaluation x 10
 
 -- 16- Insertion dans la table Note x 10
+
+-- Cours
+-- Afficher tous les cours triés par code
+SELECT *
+FROM Cours
+ORDER BY code_Cours;
+
+-- Afficher les cours de type théorique
+SELECT code_Cours, nom_Cours, credit_Cours, type_Cours
+FROM Cours
+WHERE type_Cours = 'Théorique';
+
+-- Afficher les cours ayant plus de 45 heures
+SELECT code_Cours, nom_Cours, nbHeure_Cours
+FROM Cours
+WHERE nbHeure_Cours > 45;
+
+-- Afficher le nombre de cours par type
+SELECT type_Cours, COUNT(*) AS nb_Cours
+FROM Cours
+GROUP BY type_Cours;
+
+-- Afficher les cours qui ont un préalable
+SELECT DISTINCT C.code_Cours, C.nom_Cours
+FROM Cours C
+JOIN CoursPrerequis CP ON C.id_Cours = CP.id_Cours
+ORDER BY C.code_Cours;
+
+
+-- Programme
+-- Afficher tous les programmes triés par nom
+SELECT *
+FROM Programme
+ORDER BY nom_Prog;
+
+-- Afficher les programmes de plus de 60 crédits
+SELECT code_Prog, nom_Prog, nbCredit_Prog
+FROM Programme
+WHERE nbCredit_Prog > 60;
+
+-- Afficher les programmes d'une durée de 3 ans
+SELECT code_Prog, nom_Prog, duree_Prog
+FROM Programme
+WHERE duree_Prog = 3;
+
+-- Afficher le nombre de programmes par unité
+SELECT unite_Prog, COUNT(*) AS nb_Programmes
+FROM Programme
+GROUP BY unite_Prog;
+
+-- Afficher le programme ayant le plus de crédits
+SELECT TOP 1 code_Prog, nom_Prog, nbCredit_Prog
+FROM Programme
+ORDER BY nbCredit_Prog DESC;
+
+
+
+-- CoursOffert
+-- Afficher tous les cours offerts avec leur horaire
+SELECT *
+FROM CoursOffert
+ORDER BY horaire_CoursOf;
+
+-- Afficher les cours offerts ayant une capacité supérieure à 30
+SELECT id_CoursOf, sect_CoursOf, capacite_CoursOf, horaire_CoursOf, salle_CoursOf
+FROM CoursOffert
+WHERE capacite_CoursOf > 30;
+
+-- Afficher les cours offerts en présentiel
+SELECT id_CoursOf, horaire_CoursOf, salle_CoursOf, mondeEns_CoursOf
+FROM CoursOffert
+WHERE mondeEns_CoursOf = 'Présentiel';
+
+-- Afficher le nombre de cours offerts par salle
+SELECT salle_CoursOf, COUNT(*) AS nb_CoursOfferts
+FROM CoursOffert
+GROUP BY salle_CoursOf;
+
+-- Afficher le cours offert ayant la plus grande capacité
+SELECT TOP 1 *
+FROM CoursOffert
+ORDER BY capacite_CoursOf DESC;
+
+
+
+-- CoursPrerequis
+
+-- Afficher toutes les relations de préalables
+SELECT *
+FROM CoursPrerequis;
+
+-- Afficher les cours et leurs préalables avec les noms
+SELECT 
+    C1.code_Cours AS CodeCours,
+    C1.nom_Cours AS Cours,
+    C2.code_Cours AS CodePrerequis,
+    C2.nom_Cours AS Prerequis
+FROM CoursPrerequis CP
+JOIN Cours C1 ON CP.id_Cours = C1.id_Cours
+JOIN Cours C2 ON CP.id_Prerequis = C2.id_Cours
+ORDER BY C1.code_Cours;
+
+-- Afficher le nombre de préalables par cours
+SELECT 
+    C.code_Cours,
+    C.nom_Cours,
+    COUNT(CP.id_Prerequis) AS nb_Prerequis
+FROM Cours C
+JOIN CoursPrerequis CP ON C.id_Cours = CP.id_Cours
+GROUP BY C.code_Cours, C.nom_Cours
+ORDER BY nb_Prerequis DESC;
+
+-- Afficher les cours qui ont plus d'un préalable
+SELECT 
+    C.code_Cours,
+    C.nom_Cours,
+    COUNT(CP.id_Prerequis) AS nb_Prerequis
+FROM Cours C
+JOIN CoursPrerequis CP ON C.id_Cours = CP.id_Cours
+GROUP BY C.code_Cours, C.nom_Cours
+HAVING COUNT(CP.id_Prerequis) > 1;
+
+-- Afficher les cours qui servent de préalable à d'autres cours
+SELECT DISTINCT
+    C.code_Cours,
+    C.nom_Cours
+FROM Cours C
+JOIN CoursPrerequis CP ON C.id_Cours = CP.id_Prerequis
+ORDER BY C.code_Cours;
+
+
+
+-- CoursProgramme
+-- Afficher toutes les associations cours-programmes
+SELECT *
+FROM CoursProgramme;
+
+-- Afficher les cours associés aux programmes avec les noms
+SELECT 
+    P.code_Prog,
+    P.nom_Prog,
+    C.code_Cours,
+    C.nom_Cours
+FROM CoursProgramme CP
+JOIN Programme P ON CP.id_Prog = P.id_Prog
+JOIN Cours C ON CP.id_Cours = C.id_Cours
+ORDER BY P.code_Prog, C.code_Cours;
+
+--  Afficher le nombre de cours par programme
+SELECT 
+    P.code_Prog,
+    P.nom_Prog,
+    COUNT(CP.id_Cours) AS nb_Cours
+FROM Programme P
+JOIN CoursProgramme CP ON P.id_Prog = CP.id_Prog
+GROUP BY P.code_Prog, P.nom_Prog
+ORDER BY nb_Cours DESC;
+
+-- Afficher les programmes qui ont plus d'un cours
+SELECT 
+    P.code_Prog,
+    P.nom_Prog,
+    COUNT(CP.id_Cours) AS nb_Cours
+FROM Programme P
+JOIN CoursProgramme CP ON P.id_Prog = CP.id_Prog
+GROUP BY P.code_Prog, P.nom_Prog
+HAVING COUNT(CP.id_Cours) > 1;
+
+-- Afficher les cours qui appartiennent à plus d'un programme
+SELECT 
+    C.code_Cours,
+    C.nom_Cours,
+    COUNT(CP.id_Prog) AS nb_Programmes
+FROM Cours C
+JOIN CoursProgramme CP ON C.id_Cours = CP.id_Cours
+GROUP BY C.code_Cours, C.nom_Cours
+HAVING COUNT(CP.id_Prog) > 1;
