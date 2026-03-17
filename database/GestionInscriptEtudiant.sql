@@ -33,77 +33,142 @@ GO
 IF EXISTS (
 	SELECT 1
 	FROM sys.foreign_keys
-	WHERE NAME = 'FK_Specialisation_Programme' OR NAME = 'FK_Etudiant_Programme' OR NAME = 'FK_CoursProgramme_Programme' OR NAME = 'FK_CoursProgramme_Cours' 
-			OR NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis' OR NAME = 'FK_CoursOffert_Cours' OR NAME = 'FK_SessionExamen_Semestre' 
-			OR NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_SessionExamen' OR NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
-			OR NAME = 'FK_Inscription_Etudiant' OR NAME = 'FK_Inscription_CoursOffert' OR NAME = 'FK_Note_Inscription' OR NAME = 'FK_Note_Evaluation'
-			OR NAME = 'FK_Restreindre_Specialisation' OR NAME = 'FK_Restreindre_Cours' OR NAME = 'FK_Enseigner_Professeur' OR NAME = 'FK_Enseigner_CoursOffert'
-)
-BEGIN
-	ALTER TABLE Specialisation
-	DROP CONSTRAINT FK_Specialisation_Programme;
-
-	ALTER TABLE Etudiant
-	DROP CONSTRAINT FK_Etudiant_Programme
-
-	ALTER TABLE CoursProgramme
-	DROP CONSTRAINT FK_CoursProgramme_Programme, FK_CoursProgramme_Cours
-
-	ALTER TABLE CoursPrerequis
-	DROP CONSTRAINT FK_CoursPrerequis_Cours, FK_CoursPrerequis_Prerequis;
-
-	ALTER TABLE CoursOffert
-	DROP CONSTRAINT FK_CoursOffert_Cours;
-
-	ALTER TABLE SessionExamen
-	DROP CONSTRAINT FK_SessionExamen_Semestre;
-
-	ALTER TABLE Evaluation
-	DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_SessionExamen;
-
-	ALTER TABLE ChoixSpecialisation
-	DROP CONSTRAINT FK_ChoixSpecialisation_Etudiant, FK_ChoixSpecialisation_Specialisation;
-
-	ALTER TABLE Inscription
-	DROP CONSTRAINT FK_Inscription_Etudiant, FK_Inscription_CoursOffert;
-
-	ALTER TABLE Note
-	DROP CONSTRAINT FK_Note_Inscription, FK_Note_Evaluation;
-
-	ALTER TABLE Restreindre
-	DROP CONSTRAINT FK_Restreindre_Specialisation, FK_Restreindre_Cours;
-
-	ALTER TABLE Enseigner
-	DROP CONSTRAINT FK_Enseigner_Professeur, FK_Enseigner_CoursOffert;
-END
+	WHERE NAME = 'FK_Specialisation_Programme' 	)
+	BEGIN
+		ALTER TABLE Specialisation
+		DROP CONSTRAINT FK_Specialisation_Programme;
+	END
 
 IF EXISTS (
 	SELECT 1
-	FROM sys.key_constraints
-	WHERE NAME = 'PK_Programme'
-)
-BEGIN
-	ALTER TABLE Programme
-	DROP CONSTRAINT PK_Programme
-END
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Etudiant_Programme'
+	)
+	BEGIN
+		ALTER TABLE Etudiant
+		DROP CONSTRAINT FK_Etudiant_Programme
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_CoursProgramme_Programme' OR name = 'FK_CoursProgramme_Cours'
+	)
+	BEGIN
+		ALTER TABLE CoursProgramme
+		DROP CONSTRAINT FK_CoursProgramme_Programme, FK_CoursProgramme_Cours
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis'
+	)
+	BEGIN
+		ALTER TABLE CoursPrerequis
+		DROP CONSTRAINT FK_CoursPrerequis_Cours, FK_CoursPrerequis_Prerequis;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_CoursOffert_Cours'
+	)
+	BEGIN
+		ALTER TABLE CoursOffert
+		DROP CONSTRAINT FK_CoursOffert_Cours;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_SessionExamen_Semestre'
+	)
+	BEGIN
+		ALTER TABLE SessionExamen
+		DROP CONSTRAINT FK_SessionExamen_Semestre;
+	END
+	
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_SessionExamen'
+	)
+	BEGIN
+		ALTER TABLE Evaluation
+		DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_SessionExamen;
+	END
+	
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
+	)
+	BEGIN
+		ALTER TABLE ChoixSpecialisation
+		DROP CONSTRAINT FK_ChoixSpecialisation_Etudiant, FK_ChoixSpecialisation_Specialisation;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Inscription_Etudiant' OR NAME = 'FK_Inscription_CoursOffert'
+	)
+	BEGIN
+		ALTER TABLE Inscription
+		DROP CONSTRAINT FK_Inscription_Etudiant, FK_Inscription_CoursOffert;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Note_Inscription' OR NAME = 'FK_Note_Evaluation'
+	)
+	BEGIN
+		ALTER TABLE Note
+		DROP CONSTRAINT FK_Note_Inscription, FK_Note_Evaluation;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Restreindre_Specialisation' OR NAME = 'FK_Restreindre_Cours'
+	)
+	BEGIN
+		ALTER TABLE Restreindre
+		DROP CONSTRAINT FK_Restreindre_Specialisation, FK_Restreindre_Cours;
+	END
 
 
-DROP TABLE IF EXISTS Programme;
-DROP TABLE IF EXISTS Specialisation;
-DROP TABLE IF EXISTS Etudiant;
-DROP TABLE IF EXISTS Cours;
-DROP TABLE IF EXISTS CoursProgramme;
-DROP TABLE IF EXISTS CoursPrerequis;
-DROP TABLE IF EXISTS CoursOffert;
-DROP TABLE IF EXISTS Semestre;
-DROP TABLE IF EXISTS SessionExamen;
-DROP TABLE IF EXISTS Evaluation;
-DROP TABLE IF EXISTS Professeur;
-DROP TABLE IF EXISTS ChoixSpecialisation;
-DROP TABLE IF EXISTS Inscription;
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Enseigner_Professeur'
+	)
+	BEGIN
+		ALTER TABLE Enseigner
+		DROP CONSTRAINT FK_Enseigner_Professeur, FK_Enseigner_CoursOffert;
+	END
+
+
+
 DROP TABLE IF EXISTS Note;
+DROP TABLE IF EXISTS Inscription;
+DROP TABLE IF EXISTS ChoixSpecialisation;
+DROP TABLE IF EXISTS Evaluation;
+DROP TABLE IF EXISTS SessionExamen;
+DROP TABLE IF EXISTS CoursOffert;
+DROP TABLE IF EXISTS CoursPrerequis;
+DROP TABLE IF EXISTS CoursProgramme;
 DROP TABLE IF EXISTS Restreindre;
 DROP TABLE IF EXISTS Enseigner;
+DROP TABLE IF EXISTS Etudiant;
+DROP TABLE IF EXISTS Specialisation;
+DROP TABLE IF EXISTS Professeur;
+DROP TABLE IF EXISTS Semestre;
+DROP TABLE IF EXISTS Cours;
+DROP TABLE IF EXISTS Programme;
+
 
 CREATE TABLE Programme (
 	id_Prog INT IDENTITY(1000, 1) NOT NULL,
@@ -114,7 +179,7 @@ CREATE TABLE Programme (
 	unite_Prog VARCHAR(30),
 	duree_Prog INT,
 	dateCreat_Prog DATE CONSTRAINT DF_Prog_dateCreat_Prog DEFAULT CAST(GETDATE() AS  DATE),
-	CONSTRAINT PK_Programme PRIMARY KEY(id_Prog),
+	CONSTRAINT PK_Programme PRIMARY KEY(id_Prog)
 );
 
 INSERT INTO Programme(code_Prog, nom_Prog, descript_Prog, nbCredit_Prog, unite_Prog, duree_Prog)
@@ -175,7 +240,7 @@ VALUES (
     '123 Rue Principale, Montréal, QC', 
     'inscrit', 
     1000  -- id du programme existant dans la table Programme
-);
+	);
 
 -- 4 Création de la table Cours 
 
@@ -197,7 +262,7 @@ CREATE TABLE CoursProgramme (
 	id_Prog INT NOT NULL,
 	id_Cours INT NOT NULL,
 	CONSTRAINT PK_CoursProgramme PRIMARY KEY(id_CoursProg),
-	CONSTRAINT FK_CoursProgramme_Programme FOREIGN KEY(id_Cours) REFERENCES Programme(id_Prog),
+	CONSTRAINT FK_CoursProgramme_Programme FOREIGN KEY(id_Prog) REFERENCES Programme(id_Prog),
 	CONSTRAINT FK_CoursProgramme_Cours FOREIGN KEY (id_Cours) REFERENCES Cours(id_Cours)
 )
 
@@ -220,9 +285,9 @@ CREATE TABLE CoursOffert (
 	capacite_CoursOf INT NOT NULL,
 	horaire_CoursOf VARCHAR(10) NOT NULL,
 	salle_CoursOf VARCHAR(15),
-	dateDeb_CourOf DATE,
-	dateFin_CourOf DATE,
-	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Presentiel',
+	dateDeb_CoursOf DATE,
+	dateFin_CoursOf DATE,
+	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Présentiel',
 	id_Cours INT NOT NULL,
 	CONSTRAINT CK_CoursOf_mondeEns_CoursOf CHECK (mondeEns_CoursOf IN ('Présentiel', 'Asynchrone', 'En ligne', 'Bimodal')),
 	CONSTRAINT PK_CoursOffert PRIMARY KEY(id_CoursOf),
@@ -265,10 +330,12 @@ CREATE TABLE Evaluation (
 	descript_Eval VARCHAR(100),
 	id_CoursOf INT NOT NULL,
 	id_SessExam INT NOT NULL,
-	CONSTRAINT CK_Evaluation_type_Eval CHECK(type_Eval IN ('Travaux Pratiques%', 'Intra', 'Quiz', 'Examen final')),
+	--id_Semest INT NOT NULL,
+	CONSTRAINT CK_Evaluation_type_Eval CHECK(type_Eval LIKE 'Travaux Pratiques%' OR
+	type_Eval IN ('Intra', 'Quiz', 'Examen final')),
 	CONSTRAINT PK_Evaluation PRIMARY KEY(id_Eval),
 	CONSTRAINT FK_Evaluation_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
-	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam)
+	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam),
 )
 
 -- 11-) Création de la table Professeur
@@ -311,7 +378,7 @@ CREATE TABLE ChoixSpecialisation (
 
 CREATE TABLE Inscription (
 	id_Inscript INT IDENTITY(10, 1),
-	statut_Inscipt VARCHAR(20),
+	statut_Inscript VARCHAR(20),
 	date_Inscript DATE DEFAULT GETDATE(),
 	date_Desinscript DATE,
 	noteFi_Inscript DECIMAL(4, 2),
@@ -364,7 +431,7 @@ CREATE TABLE Enseigner (
 	CONSTRAINT PK_Enseigner PRIMARY KEY(id_Enseigner),
 	CONSTRAINT FK_Enseigner_Professeur FOREIGN KEY(id_Prof) REFERENCES Professeur(id_Prof),
 	CONSTRAINT FK_Enseigner_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf)
-)
+	)
 
 /*
 1- Spécification des colonnes calculées
