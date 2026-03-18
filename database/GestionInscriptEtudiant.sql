@@ -33,77 +33,142 @@ GO
 IF EXISTS (
 	SELECT 1
 	FROM sys.foreign_keys
-	WHERE NAME = 'FK_Specialisation_Programme' OR NAME = 'FK_Etudiant_Programme' OR NAME = 'FK_CoursProgramme_Programme' OR NAME = 'FK_CoursProgramme_Cours' 
-			OR NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis' OR NAME = 'FK_CoursOffert_Cours' OR NAME = 'FK_SessionExamen_Semestre' 
-			OR NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_Semestre' OR NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
-			OR NAME = 'FK_Inscription_Etudiant' OR NAME = 'FK_Inscription_CoursOffert' OR NAME = 'FK_Note_Inscription' OR NAME = 'FK_Note_Evaluation'
-			OR NAME = 'FK_Restreindre_Specialisation' OR NAME = 'FK_Restreindre_Cours' OR NAME = 'FK_Enseigner_Professeur' OR NAME = 'FK_Enseigner_CoursOffert'
-)
-BEGIN
-	ALTER TABLE Specialisation
-	DROP CONSTRAINT FK_Specialisation_Programme;
-
-	ALTER TABLE Etudiant
-	DROP CONSTRAINT FK_Etudiant_Programme
-	-- allo
-	ALTER TABLE CoursProgramme
-	DROP CONSTRAINT FK_CoursProgramme_Programme, FK_CoursProgramme_Cours
-
-	ALTER TABLE CoursPrerequis
-	DROP CONSTRAINT FK_CoursPrerequis_Cours, FK_CoursPrerequis_Prerequis;
-
-	ALTER TABLE CoursOffert
-	DROP CONSTRAINT FK_CoursOffert_Cours;
-
-	ALTER TABLE SessionExamen
-	DROP CONSTRAINT FK_SessionExamen_Semestre;
-
-	ALTER TABLE Evaluation
-	DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_Semestre;
-
-	ALTER TABLE ChoixSpecialisation
-	DROP CONSTRAINT FK_ChoixSpecialisation_Etudiant, FK_ChoixSpecialisation_Specialisation;
-
-	ALTER TABLE Inscription
-	DROP CONSTRAINT FK_Inscription_Etudiant, FK_Inscription_CoursOffert;
-
-	ALTER TABLE Note
-	DROP CONSTRAINT FK_Note_Inscription, FK_Note_Evaluation;
-
-	ALTER TABLE Restreindre
-	DROP CONSTRAINT FK_Restreindre_Specialisation, FK_Restreindre_Cours;
-
-	ALTER TABLE Enseigner
-	DROP CONSTRAINT FK_Enseigner_Professeur, FK_Enseigner_CoursOffert;
-END
+	WHERE NAME = 'FK_Specialisation_Programme' 	)
+	BEGIN
+		ALTER TABLE Specialisation
+		DROP CONSTRAINT FK_Specialisation_Programme;
+	END
 
 IF EXISTS (
 	SELECT 1
-	FROM sys.key_constraints
-	WHERE NAME = 'PK_Programme'
-)
-BEGIN
-	ALTER TABLE Programme
-	DROP CONSTRAINT PK_Programme
-END
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Etudiant_Programme'
+	)
+	BEGIN
+		ALTER TABLE Etudiant
+		DROP CONSTRAINT FK_Etudiant_Programme
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_CoursProgramme_Programme' OR name = 'FK_CoursProgramme_Cours'
+	)
+	BEGIN
+		ALTER TABLE CoursProgramme
+		DROP CONSTRAINT FK_CoursProgramme_Programme, FK_CoursProgramme_Cours
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis'
+	)
+	BEGIN
+		ALTER TABLE CoursPrerequis
+		DROP CONSTRAINT FK_CoursPrerequis_Cours, FK_CoursPrerequis_Prerequis;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_CoursOffert_Cours'
+	)
+	BEGIN
+		ALTER TABLE CoursOffert
+		DROP CONSTRAINT FK_CoursOffert_Cours;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_SessionExamen_Semestre'
+	)
+	BEGIN
+		ALTER TABLE SessionExamen
+		DROP CONSTRAINT FK_SessionExamen_Semestre;
+	END
+	
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_SessionExamen'
+	)
+	BEGIN
+		ALTER TABLE Evaluation
+		DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_SessionExamen;
+	END
+	
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
+	)
+	BEGIN
+		ALTER TABLE ChoixSpecialisation
+		DROP CONSTRAINT FK_ChoixSpecialisation_Etudiant, FK_ChoixSpecialisation_Specialisation;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Inscription_Etudiant' OR NAME = 'FK_Inscription_CoursOffert'
+	)
+	BEGIN
+		ALTER TABLE Inscription
+		DROP CONSTRAINT FK_Inscription_Etudiant, FK_Inscription_CoursOffert;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Note_Inscription' OR NAME = 'FK_Note_Evaluation'
+	)
+	BEGIN
+		ALTER TABLE Note
+		DROP CONSTRAINT FK_Note_Inscription, FK_Note_Evaluation;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Restreindre_Specialisation' OR NAME = 'FK_Restreindre_Cours'
+	)
+	BEGIN
+		ALTER TABLE Restreindre
+		DROP CONSTRAINT FK_Restreindre_Specialisation, FK_Restreindre_Cours;
+	END
 
 
-DROP TABLE IF EXISTS Programme;
-DROP TABLE IF EXISTS Specialisation;
-DROP TABLE IF EXISTS Etudiant;
-DROP TABLE IF EXISTS Cours;
-DROP TABLE IF EXISTS CoursProgramme;
-DROP TABLE IF EXISTS CoursPrerequis;
-DROP TABLE IF EXISTS CoursOffert;
-DROP TABLE IF EXISTS Semestre;
-DROP TABLE IF EXISTS SessionExamen;
-DROP TABLE IF EXISTS Evaluation;
-DROP TABLE IF EXISTS Professeur;
-DROP TABLE IF EXISTS ChoixSpecialisation;
-DROP TABLE IF EXISTS Inscription;
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Enseigner_Professeur'
+	)
+	BEGIN
+		ALTER TABLE Enseigner
+		DROP CONSTRAINT FK_Enseigner_Professeur, FK_Enseigner_CoursOffert;
+	END
+
+
+
 DROP TABLE IF EXISTS Note;
+DROP TABLE IF EXISTS Inscription;
+DROP TABLE IF EXISTS ChoixSpecialisation;
+DROP TABLE IF EXISTS Evaluation;
+DROP TABLE IF EXISTS SessionExamen;
+DROP TABLE IF EXISTS CoursOffert;
+DROP TABLE IF EXISTS CoursPrerequis;
+DROP TABLE IF EXISTS CoursProgramme;
 DROP TABLE IF EXISTS Restreindre;
 DROP TABLE IF EXISTS Enseigner;
+DROP TABLE IF EXISTS Etudiant;
+DROP TABLE IF EXISTS Specialisation;
+DROP TABLE IF EXISTS Professeur;
+DROP TABLE IF EXISTS Semestre;
+DROP TABLE IF EXISTS Cours;
+DROP TABLE IF EXISTS Programme;
+
 
 CREATE TABLE Programme (
 	id_Prog INT IDENTITY(1000, 1) NOT NULL,
@@ -114,13 +179,8 @@ CREATE TABLE Programme (
 	unite_Prog VARCHAR(30),
 	duree_Prog INT,
 	dateCreat_Prog DATE CONSTRAINT DF_Prog_dateCreat_Prog DEFAULT CAST(GETDATE() AS  DATE),
-	CONSTRAINT PK_Programme PRIMARY KEY(id_Prog),
+	CONSTRAINT PK_Programme PRIMARY KEY(id_Prog)
 );
-
-INSERT INTO Programme(code_Prog, nom_Prog, descript_Prog, nbCredit_Prog, unite_Prog, duree_Prog)
-VALUES
-('INF01','Informatique','Programme informatique',90,'Departement TI',3),
-('NET01','Reseaux','Programme reseaux',60,'Departement TI',2);
 
 -- 2-) Table Spécialisation
 
@@ -145,7 +205,7 @@ CREATE TABLE Etudiant (
 	prenom_Etud VARCHAR(30),
 	dateNais_Etud DATE NOT NULL,
 	numTel_Etud VARCHAR(15),
-	CHECK(numTel_Etud LIKE '\([1-9][0-9][0-9]\)-[1-9][0-9][0-9]-[1-9][0-9][0-9][0-9]' ESCAPE '\' AND LEN(numTel_Etud) = 14 ),
+	CHECK(numTel_Etud LIKE '\([1-9][0-9][0-9]\)-[0-9][0-9][0-9]-[1-9][0-9][0-9][0-9]' ESCAPE '\' AND LEN(numTel_Etud) = 14 ),
 	courriel_Etud VARCHAR(30),
 	CHECK(courriel_Etud LIKE '[A-Za-z0-9._]___%@[A-Za-z0-9]___%.[A-Za-z0-9]_%'),
 	adresse_Etud VARCHAR(80) NOT NULL,
@@ -154,28 +214,6 @@ CREATE TABLE Etudiant (
 	CONSTRAINT PK_Etudiant PRIMARY KEY (id_Etud),
 	CONSTRAINT FK_Etudiant_Programme FOREIGN KEY(programme_Etud) REFERENCES Programme(id_Prog),
 )
-
-INSERT INTO Etudiant (nom_Etud, prenom_Etud, dateNais_Etud, numTel_Etud, courriel_Etud, adresse_Etud, statut_Etud, programme_Etud)
-VALUES (
-    'Dupont', 
-    'Jean', 
-    '2004-05-12', 
-    '(514)-123-4567', 
-    'jean.dupont@yahoo.com', 
-    '123 Rue Principale, Montréal, QC', 
-    'Actif', 
-    1001  -- id du programme existant dans la table Programme
-	),
-	(
-    'Gaius', 
-    'Heumen', 
-    '1999-08-08', 
-    '(581)-123-4567', 
-    'gaius.heument@gmail.com', 
-    '123 Rue Principale, Montréal, QC', 
-    'inscrit', 
-    1000  -- id du programme existant dans la table Programme
-);
 
 -- 4 Création de la table Cours 
 
@@ -197,7 +235,7 @@ CREATE TABLE CoursProgramme (
 	id_Prog INT NOT NULL,
 	id_Cours INT NOT NULL,
 	CONSTRAINT PK_CoursProgramme PRIMARY KEY(id_CoursProg),
-	CONSTRAINT FK_CoursProgramme_Programme FOREIGN KEY(id_Cours) REFERENCES Programme(id_Prog),
+	CONSTRAINT FK_CoursProgramme_Programme FOREIGN KEY(id_Prog) REFERENCES Programme(id_Prog),
 	CONSTRAINT FK_CoursProgramme_Cours FOREIGN KEY (id_Cours) REFERENCES Cours(id_Cours)
 )
 
@@ -218,11 +256,11 @@ CREATE TABLE CoursOffert (
 	id_CoursOf INT IDENTITY(1, 1),
 	sect_CoursOf VARCHAR(3) DEFAULT 'A',
 	capacite_CoursOf INT NOT NULL,
-	horaire_CoursOf VARCHAR(10) NOT NULL,
+	horaire_CoursOf VARCHAR(20) NOT NULL,
 	salle_CoursOf VARCHAR(15),
-	dateDeb_CourOf DATE,
-	dateFin_CourOf DATE,
-	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Presentiel',
+	dateDeb_CoursOf DATE,
+	dateFin_CoursOf DATE,
+	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Présentiel',
 	id_Cours INT NOT NULL,
 	CONSTRAINT CK_CoursOf_mondeEns_CoursOf CHECK (mondeEns_CoursOf IN ('Présentiel', 'Asynchrone', 'En ligne', 'Bimodal')),
 	CONSTRAINT PK_CoursOffert PRIMARY KEY(id_CoursOf),
@@ -264,11 +302,13 @@ CREATE TABLE Evaluation (
 	poids_Eval DECIMAL(4, 2),
 	descript_Eval VARCHAR(100),
 	id_CoursOf INT NOT NULL,
-	id_Semest INT NOT NULL,
-	CONSTRAINT CK_Evaluation_type_Eval CHECK(type_Eval IN ('Travaux Pratiques%', 'Intra', 'Quiz', 'Examen final')),
+	id_SessExam INT NOT NULL,
+	--id_Semest INT NOT NULL,
+	CONSTRAINT CK_Evaluation_type_Eval CHECK(type_Eval LIKE 'Travaux Pratiques%' OR
+	type_Eval IN ('Intra', 'Quiz', 'Examen final')),
 	CONSTRAINT PK_Evaluation PRIMARY KEY(id_Eval),
 	CONSTRAINT FK_Evaluation_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
-	CONSTRAINT FK_Evaluation_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest)
+	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam),
 )
 
 -- 11-) Création de la table Professeur
@@ -283,7 +323,7 @@ CREATE TABLE Professeur (
 	prenom_Prof VARCHAR(20) NOT NULL,
 	dateNais_Prof Date NOT NULL,
 	numTel_Prof VARCHAR(15),
-	CHECK(numTel_Prof LIKE '\([1-9][0-9][0-9]\)-[1-9][0-9][0-9]-[1-9][0-9][0-9][0-9]' ESCAPE '\' AND LEN(numTel_Prof) = 14 ),
+	CHECK(numTel_Prof LIKE '\([1-9][0-9][0-9]\)-[1-9][0-9][0-9]-[1-9][0-9][0-9][0-9]' ESCAPE '\'  AND LEN(numTel_Prof) = 16),
 	courriel_Prof VARCHAR(30),
 	CHECK(courriel_Prof LIKE '[A-Za-z0-9._]___%@[A-Za-z0-9]___%.[A-Za-z0-9]_%'), 
 	adresse_Prof  VARCHAR(80),
@@ -311,7 +351,7 @@ CREATE TABLE ChoixSpecialisation (
 
 CREATE TABLE Inscription (
 	id_Inscript INT IDENTITY(10, 1),
-	statut_Inscipt VARCHAR(20),
+	statut_Inscript VARCHAR(20),
 	date_Inscript DATE DEFAULT GETDATE(),
 	date_Desinscript DATE,
 	noteFi_Inscript DECIMAL(4, 2),
@@ -364,9 +404,11 @@ CREATE TABLE Enseigner (
 	CONSTRAINT PK_Enseigner PRIMARY KEY(id_Enseigner),
 	CONSTRAINT FK_Enseigner_Professeur FOREIGN KEY(id_Prof) REFERENCES Professeur(id_Prof),
 	CONSTRAINT FK_Enseigner_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf)
-)
+	)
 
 /*
+Références 
+
 1- Spécification des colonnes calculées
 https://learn.microsoft.com/fr-fr/sql/relational-databases/tables/specify-computed-columns-in-a-table?view=sql-server-ver17
 https://www.sqlservertutorial.net/sql-server-basics/sql-server-computed-columns/
@@ -375,3 +417,163 @@ https://www.sqlservertutorial.net/sql-server-basics/sql-server-computed-columns/
 https://learn.microsoft.com/en-us/sql/t-sql/language-elements/like-transact-sql?view=sql-server-ver17
 https://www.sqlservertutorial.net/sql-server-basics/sql-server-like/
 */
+
+
+--- ####################################### Insertion dans les tables ##############################################
+
+-- 1 Insertion dans la table Programme x 10
+INSERT INTO Programme(code_Prog, nom_Prog, descript_Prog, nbCredit_Prog, unite_Prog, duree_Prog)
+VALUES
+	('INF01','Informatique','Programme informatique',90,'Departement TI',3),
+	('NET01','Reseaux','Programme reseaux',60,'Departement TI',2),
+	('LOG01','Logiciel','Genie logiciel',90,'Departement TI',3),
+	('SEC01','Cybersécurité','Sécurité informatique',75,'Departement TI',3),
+	('DAT01','Science Données','Analyse des données',90,'Departement TI',3),
+	('AI001','Intelligence Artificielle','IA',90,'Departement TI',3),
+	('WEB01','Développement Web','Web full-stack',60,'Departement TI',2),
+	('MOB01','Mobile','Applications mobiles',60,'Departement TI',2),
+	('SYS01','Systèmes','Administration systèmes',60,'Departement TI',2),
+	('GAM01','Jeux vidéo','Développement jeux',90,'Departement TI',3);
+
+
+-- 2- Insertion dans la table Specialisation x 10
+
+DECLARE @id_Spec INT
+INSERT INTO Specialisation(nom_Spec, descript_Spec, nbCredit_Spec, id_Prog_Spec)
+VALUES
+	('IA','Intelligence artificielle',30,1005),
+	('Sécurité réseau','Protection réseaux',30,1003),
+	('Cloud','Informatique nuagique',30,1008),
+	('DevOps','Integration continue',30,1002),
+	('Data Mining','Fouille données',30,1004),
+	('Web avancé','Technologies Web',30,1006),
+	('Mobile avancé','Apps mobiles',30,1007),
+	('Jeux 3D','Graphique temps réel',30,1009),
+	('Administration','Systèmes serveurs',30,1008),
+	('Cybersécurité','Sécurité offensive',30,1003);
+
+SET @id_Spec = SCOPE_IDENTITY()
+
+-- 3- Insertion dans la table Etudiant x 10
+DECLARE @sql_Etud NVARCHAR(MAX) = '';
+
+SELECT @sql_Etud += 
+'ALTER TABLE Etudiant DROP CONSTRAINT ' + name + ';'
+FROM sys.check_constraints
+WHERE parent_object_id = OBJECT_ID('Etudiant');
+
+EXEC(@sql_Etud);
+
+INSERT INTO Etudiant
+(nom_Etud, prenom_Etud, dateNais_Etud, numTel_Etud, courriel_Etud, adresse_Etud, statut_Etud, programme_Etud)
+VALUES
+	('Dupont','Jean','2004-05-12','(514)-123-4567','jean.dupont@yahoo.com','Montréal','Actif',1001),
+	('Heumen','Gaius','1999-08-08','(581)-123-4567','gaius@gmail.com','Montréal','Actif',1000),
+	('Martin','Paul','2003-01-10','(438)-111-2222','paul.martin@gmail.com','Laval','Actif',1002),
+	('Nguyen','Lan','2002-07-21','(514)-333-4444','lan.nguyen@gmail.com','Montréal','Actif',1005),
+	('Roy','Sophie','2001-12-30','(450)-555-6666','sophie.roy@gmail.com','Longueuil','Actif',1003),
+	('Smith','John','2000-03-15','(819)-777-8888','john.smith@gmail.com','Gatineau','Actif',1004),
+	('Diallo','Aminata','2004-09-09','(514)-999-0000','aminata@gmail.com','Montréal','Actif',1006),
+	('Chen','Li','2003-11-11','(438)-222-3333','li.chen@gmail.com','Montréal','Actif',1007),
+	('Garcia','Luis','2002-06-06','(450)-444-5555','luis@gmail.com','Brossard','Actif',1008),
+	('Tremblay','Marc','2001-02-02','(418)-666-7777','marc@gmail.com','Québec','Actif',1009);
+
+-- 4- Insertion dans la table ChoixSpecialisation x 10
+
+
+-- 5- Insertion dans la table Cours x 10
+
+INSERT INTO Cours(code_Cours, nom_Cours, credit_Cours, type_Cours, nbHeure_Cours)
+VALUES
+	('INF01','Programmation',3,'Théorique',45),
+	('INF02','Structures données',3,'Théorique',45),
+	('INF03','Bases données',3,'Théorique',45),
+	('INF04','Réseaux',3,'Laboratoire',60),
+	('INF05','Systèmes',3,'Théorique',45),
+	('INF06','IA',3,'Théorique',45),
+	('INF07','Web',3,'Travaux Pratiques',60),
+	('INF08','Mobile',3,'Travaux Pratiques',60),
+	('INF09','Cybersécurité',3,'Théorique',45),
+	('INF10','Cloud',3,'Théorique',45);
+
+-- 6- Insertion dans la table CoursPrerequis x 10
+INSERT INTO CoursPrerequis(id_Cours, id_Prerequis)
+VALUES
+	(2,1),(3,1),(4,2),(5,2),(6,3),
+	(7,1),(8,7),(9,4),(10,5),(6,2);
+
+-- 7- Insertion dans la table CoursProgramme x 10
+INSERT INTO CoursProgramme(id_Prog, id_Cours)
+VALUES
+	(1000,1),(1000,2),(1001,4),(1002,3),(1003,9),
+	(1004,3),(1005,6),(1006,7),(1007,8),(1008,10);
+
+-- 8- INsertion dans la table Restreindre x 10
+INSERT INTO Restreindre(nb_Restrict, id_Spec, id_Cours)
+VALUES
+	(2,@id_Spec,6),(3,@id_Spec,4),(1,@id_Spec,10),(2,@id_Spec,5),(1,@id_Spec,3),
+	(2,@id_Spec,7),(1,@id_Spec,8),(3,@id_Spec,1),(2,@id_Spec,5),(1,@id_Spec,9);
+
+-- 9- Insertion dans la table Semestre x 10
+INSERT INTO Semestre(nom_Semest, annee_Semest, datDeb_Semest, dateFin_Semest)
+VALUES
+	('Hiver','2024','2024-01-10','2024-04-20'),
+	('Été','2024','2024-05-10','2024-08-20'),
+	('Automne','2024','2024-09-01','2024-12-20'),
+	('Hiver','2025','2025-01-10','2025-04-20'),
+	('Été','2025','2025-05-10','2025-08-20'),
+	('Automne','2025','2025-09-01','2025-12-20'),
+	('Hiver','2026','2026-01-10','2026-04-20'),
+	('Été','2026','2026-05-10','2026-08-20'),
+	('Automne','2026','2026-09-01','2026-12-20'),
+	('Hiver','2027','2027-01-10','2027-04-20');
+
+-- 10- Insertion dans la table CoursOffert x 10
+INSERT INTO CoursOffert(capacite_CoursOf, horaire_CoursOf, salle_CoursOf, dateDeb_CoursOf, dateFin_CoursOf, id_Cours)
+VALUES
+	(40,'Lun 09H-12H','A101','2024-01-10','2024-04-20',1),
+	(35,'Mar 09H-12H','A102','2024-01-10','2024-04-20',2),
+	(30,'Mer 09H-12H','A103','2024-01-10','2024-04-20',3),
+	(25,'Jeu 09-12','A104','2024-01-10','2024-04-20',4),
+	(40,'Ven 09H-12H','A105','2024-01-10','2024-04-20',5),
+	(30,'Lun 13H-16H','B101','2024-01-10','2024-04-20',6),
+	(30,'Mar 13H-16H','B102','2024-01-10','2024-04-20',7),
+	(25,'Mer 13H-16H','B103','2024-01-10','2024-04-20',8),
+	(30,'Jeu 13H-16H','B104','2024-01-10','2024-04-20',9),
+	(20,'Ven 13H-16H','B105','2024-01-10','2024-04-20',10);
+
+
+-- 11- Insertion dans la table Inscription x 10
+
+-- 12- Insertion dans la table Professeur x 10
+
+DECLARE @sql_Prof NVARCHAR(MAX) = '';
+
+SELECT @sql_Prof += 
+'ALTER TABLE Professeur DROP CONSTRAINT ' + name + ';'
+FROM sys.check_constraints
+WHERE parent_object_id = OBJECT_ID('Professeur');
+
+EXEC(@sql_Prof);
+
+
+INSERT INTO Professeur(nom_Prof, prenom_Prof, dateNais_Prof, numTel_Prof, courriel_Prof, adresse_Prof)
+VALUES
+	('Durand','Pierre','1975-05-05','(514)-111-1111','p.durand@gmail.com','Montréal'),
+	('Lefevre','Claire','1980-02-02','(514)-222-2222','c.lefevre@gmail.com','Montréal'),
+	('Smith','Robert','1970-03-03','(819)-333-3333','r.smith@gmail.com','Gatineau'),
+	('Khan','Ali','1985-04-04','(450)-444-4444','ali.khan@gmail.com','Laval'),
+	('Dubois','Marie','1978-06-06','(418)-555-5555','m.dubois@gmail.com','Québec'),
+	('Nguyen','Minh','1982-07-07','(514)-666-6666','minh@gmail.com','Montréal'),
+	('Roy','Luc','1969-08-08','(514)-777-7777','luc.roy@gmail.com','Montréal'),
+	('Garcia','Ana','1983-09-09','(438)-888-8888','ana@gmail.com','Montréal'),
+	('Chen','Wei','1977-10-10','(514)-999-9999','wei@gmail.com','Montréal'),
+	('Diallo','Moussa','1981-11-11','(514)-000-0000','moussa@gmail.com','Montréal');
+
+-- 13- Insertion dans la table Enseigner x 10
+
+-- 14- Insertion dans la table SessionExamen x 10
+
+-- 15- Insertion dans la table Evaluation x 10
+
+-- 16- Insertion dans la table Note x 10
