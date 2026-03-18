@@ -92,12 +92,22 @@ IF EXISTS (
 IF EXISTS (
 	SELECT 1
 	FROM sys.foreign_keys
-	WHERE NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_SessionExamen'
-	)
-	BEGIN
-		ALTER TABLE Evaluation
-		DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_SessionExamen;
-	END
+	WHERE NAME = 'FK_Evaluation_CoursOffert'
+)
+BEGIN
+	ALTER TABLE Evaluation
+	DROP CONSTRAINT FK_Evaluation_CoursOffert;
+END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Evaluation_SessionExamen'
+)
+BEGIN
+	ALTER TABLE Evaluation
+	DROP CONSTRAINT FK_Evaluation_SessionExamen;
+END
 	
 IF EXISTS (
 	SELECT 1
@@ -150,6 +160,33 @@ IF EXISTS (
 		DROP CONSTRAINT FK_Enseigner_Professeur, FK_Enseigner_CoursOffert;
 	END
 
+	--ajouté paar christian
+IF EXISTS (
+SELECT 1 FROM sys.foreign_keys
+WHERE NAME = 'FK_Programme_Admin'
+)
+BEGIN
+	ALTER TABLE Programme DROP CONSTRAINT FK_Programme_Admin;
+END
+
+IF EXISTS (
+	SELECT 1 FROM sys.foreign_keys
+	WHERE NAME = 'FK_SessionExamen_Admin'
+)
+BEGIN
+	ALTER TABLE SessionExamen DROP CONSTRAINT FK_SessionExamen_Admin;
+END
+
+IF EXISTS (
+	SELECT 1 FROM sys.foreign_keys
+	WHERE NAME = 'FK_Enseigner_Admin'
+)
+BEGIN
+	ALTER TABLE Enseigner DROP CONSTRAINT FK_Enseigner_Admin;
+END
+
+
+
 
 
 DROP TABLE IF EXISTS Note;
@@ -168,6 +205,23 @@ DROP TABLE IF EXISTS Professeur;
 DROP TABLE IF EXISTS Semestre;
 DROP TABLE IF EXISTS Cours;
 DROP TABLE IF EXISTS Programme;
+DROP TABLE IF EXISTS Administrateur; --Ajouté par Christian;
+
+ --Table Administrateur         Ajouté par Christian
+CREATE TABLE Administrateur (
+	id_Admin INT IDENTITY(1,1) NOT NULL,
+	code_Admin AS ('ADM' + RIGHT('0000' + CAST(id_Admin AS VARCHAR(4)), 4)) PERSISTED UNIQUE,
+	nom_Admin VARCHAR(30) NOT NULL,
+	prenom_Admin VARCHAR(30) NOT NULL,
+	dateNais_Admin DATE NOT NULL,
+	numTel_Admin VARCHAR(15),
+	courriel_Admin VARCHAR(50) NOT NULL UNIQUE,
+	adresse_Admin VARCHAR(80),
+	poste_Admin VARCHAR(40) DEFAULT 'Agent administratif',
+	statut_Admin VARCHAR(20) DEFAULT 'Actif',
+	dateEmb_Admin DATE DEFAULT GETDATE(),
+	CONSTRAINT PK_Administrateur PRIMARY KEY (id_Admin)
+);
 
 
 CREATE TABLE Programme (
@@ -178,9 +232,12 @@ CREATE TABLE Programme (
 	nbCredit_Prog INT NOT NULL,
 	unite_Prog VARCHAR(30),
 	duree_Prog INT,
-	dateCreat_Prog DATE CONSTRAINT DF_Prog_dateCreat_Prog DEFAULT CAST(GETDATE() AS  DATE),
-	CONSTRAINT PK_Programme PRIMARY KEY(id_Prog)
+	dateCreat_Prog DATE CONSTRAINT DF_Prog_dateCreat_Prog DEFAULT CAST(GETDATE() AS DATE),
+	id_Admin INT,
+	CONSTRAINT PK_Programme PRIMARY KEY (id_Prog),      -- Ajouté par Christian
+	CONSTRAINT FK_Programme_Admin FOREIGN KEY (id_Admin) REFERENCES Administrateur(id_Admin)
 );
+
 
 -- 2-) Table Spécialisation
 
@@ -212,7 +269,7 @@ CREATE TABLE Etudiant (
 	statut_Etud VARCHAR(30) NOT NULL,
 	programme_Etud INT NOT NULL,
 	CONSTRAINT PK_Etudiant PRIMARY KEY (id_Etud),
-	CONSTRAINT FK_Etudiant_Programme FOREIGN KEY(programme_Etud) REFERENCES Programme(id_Prog),
+	CONSTRAINT FK_Etudiant_Programme FOREIGN KEY(programme_Etud) REFERENCES Programme(id_Prog)
 )
 
 -- 4 Création de la table Cours 
@@ -221,12 +278,16 @@ CREATE TABLE Cours (
 	id_Cours INT IDENTITY(1, 1) NOT NULL,
 	code_Cours VARCHAR(5) UNIQUE NOT NULL,
 	nom_Cours VARCHAR(30) NOT NULL,
+	descript_Cours VARCHAR(300), -- Ajout d'une description au cours 
 	credit_Cours INT NOT NULL,
 	type_Cours VARCHAR (30) NOT NULL DEFAULT 'Théorique',
 	nbHeure_Cours INT,
 	CONSTRAINT CK_Cours_type_Cours CHECK (type_Cours IN ('Théorique', 'Laboratoire', 'Démo', 'Travaux Pratiques')),
 	CONSTRAINT PK_Cours PRIMARY KEY(id_Cours)
 )
+
+
+
 
 -- 5 Création de la table CoursProgramme
 
@@ -287,10 +348,12 @@ CREATE TABLE SessionExamen (
 	dateDeb DATE NOT NULL,
 	dateFin DATE,
 	id_Semest INT NOT NULL,
+	id_Admin INT,
 	CONSTRAINT UQ_SessionExamen_type_dateDeb UNIQUE (type_SessExam, dateDeb),
 	CONSTRAINT PK_SessionExamen PRIMARY KEY(id_SessExam),
-	CONSTRAINT FK_SessionExamen_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest)
-)
+	CONSTRAINT FK_SessionExamen_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest),
+	CONSTRAINT FK_SessionExamen_Admin FOREIGN KEY(id_Admin) REFERENCES Administrateur(id_Admin)
+);
 
 -- 10-) Création de la table Evaluation
 
@@ -308,7 +371,7 @@ CREATE TABLE Evaluation (
 	type_Eval IN ('Intra', 'Quiz', 'Examen final')),
 	CONSTRAINT PK_Evaluation PRIMARY KEY(id_Eval),
 	CONSTRAINT FK_Evaluation_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
-	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam),
+	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam)
 )
 
 -- 11-) Création de la table Professeur
@@ -397,44 +460,45 @@ CREATE TABLE Restreindre (
 CREATE TABLE Enseigner (
 	id_Enseigner INT IDENTITY(1, 1),
 	nbH_Enseigner INT NOT NULL,
-	datDeb_Enseigner Date,
-	dateFin_Enseigner Date,
+	datDeb_Enseigner DATE,
+	dateFin_Enseigner DATE,
 	id_Prof INT NOT NULL,
 	id_CoursOf INT NOT NULL,
+	id_Admin INT,
 	CONSTRAINT PK_Enseigner PRIMARY KEY(id_Enseigner),
 	CONSTRAINT FK_Enseigner_Professeur FOREIGN KEY(id_Prof) REFERENCES Professeur(id_Prof),
-	CONSTRAINT FK_Enseigner_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf)
-	)
+	CONSTRAINT FK_Enseigner_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
+	CONSTRAINT FK_Enseigner_Admin FOREIGN KEY(id_Admin) REFERENCES Administrateur(id_Admin)
+);
 
-/*
-Références 
+GO
 
-1- Spécification des colonnes calculées
-https://learn.microsoft.com/fr-fr/sql/relational-databases/tables/specify-computed-columns-in-a-table?view=sql-server-ver17
-https://www.sqlservertutorial.net/sql-server-basics/sql-server-computed-columns/
 
-2- Comment utiliser les pattern matching avec LIKE ET ESCAPE 
-https://learn.microsoft.com/en-us/sql/t-sql/language-elements/like-transact-sql?view=sql-server-ver17
-https://www.sqlservertutorial.net/sql-server-basics/sql-server-like/
-*/
+
 
 
 --- ####################################### Insertion dans les tables ##############################################
 
--- 1 Insertion dans la table Programme x 10
-INSERT INTO Programme(code_Prog, nom_Prog, descript_Prog, nbCredit_Prog, unite_Prog, duree_Prog)
+INSERT INTO Administrateur    --Ajoué paar chritian
+(nom_Admin, prenom_Admin, dateNais_Admin, numTel_Admin, courriel_Admin, adresse_Admin, poste_Admin, statut_Admin)
 VALUES
-	('INF01','Informatique','Programme informatique',90,'Departement TI',3),
-	('NET01','Reseaux','Programme reseaux',60,'Departement TI',2),
-	('LOG01','Logiciel','Genie logiciel',90,'Departement TI',3),
-	('SEC01','Cybersécurité','Sécurité informatique',75,'Departement TI',3),
-	('DAT01','Science Données','Analyse des données',90,'Departement TI',3),
-	('AI001','Intelligence Artificielle','IA',90,'Departement TI',3),
-	('WEB01','Développement Web','Web full-stack',60,'Departement TI',2),
-	('MOB01','Mobile','Applications mobiles',60,'Departement TI',2),
-	('SYS01','Systèmes','Administration systèmes',60,'Departement TI',2),
-	('GAM01','Jeux vidéo','Développement jeux',90,'Departement TI',3);
+	('Bernard', 'Julie', '1980-04-12', '(514)-101-2020', 'julie.bernard@universite.ca', 'Montréal', 'Agent administratif', 'Actif'),
+	('Moreau', 'David', '1978-09-23', '(438)-303-4040', 'david.moreau@universite.ca', 'Laval', 'Registrariat', 'Actif'),
+	('Gagnon', 'Sophie', '1985-01-17', '(450)-505-6060', 'sophie.gagnon@universite.ca', 'Québec', 'Responsable programme', 'Actif');
 
+-- 1- Insertion dans la table Programme x 10
+INSERT INTO Programme(code_Prog, nom_Prog, descript_Prog, nbCredit_Prog, unite_Prog, duree_Prog, id_Admin)
+VALUES
+	('INF01','Informatique','Programme informatique',90,'Departement TI',3,1),
+	('NET01','Reseaux','Programme reseaux',60,'Departement TI',2,1),
+	('LOG01','Logiciel','Genie logiciel',90,'Departement TI',3,2),
+	('SEC01','Cybersécurité','Sécurité informatique',75,'Departement TI',3,2),
+	('DAT01','Science Données','Analyse des données',90,'Departement TI',3,3),
+	('AI001','Intelligence Artificielle','IA',90,'Departement TI',3,3),
+	('WEB01','Développement Web','Web full-stack',60,'Departement TI',2,1),
+	('MOB01','Mobile','Applications mobiles',60,'Departement TI',2,2),
+	('SYS01','Systèmes','Administration systèmes',60,'Departement TI',2,3),
+	('GAM01','Jeux vidéo','Développement jeux',90,'Departement TI',3,1);
 
 -- 2- Insertion dans la table Specialisation x 10
 
