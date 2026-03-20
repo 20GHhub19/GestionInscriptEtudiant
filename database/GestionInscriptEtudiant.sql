@@ -42,11 +42,11 @@ IF EXISTS (
 IF EXISTS (
 	SELECT 1
 	FROM sys.foreign_keys
-	WHERE NAME = 'FK_Etudiant_Programme'
+	WHERE NAME = 'FK_Etudiant_Programme' OR NAME = 'FK_Etudiant_Utilisateur'
 	)
 	BEGIN
 		ALTER TABLE Etudiant
-		DROP CONSTRAINT FK_Etudiant_Programme
+		DROP CONSTRAINT FK_Etudiant_Programme, FK_Etudiant_Utilisateur
 	END
 
 IF EXISTS (
@@ -150,6 +150,27 @@ IF EXISTS (
 		DROP CONSTRAINT FK_Enseigner_Professeur, FK_Enseigner_CoursOffert;
 	END
 
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Professeur_Utilisateur'
+	)
+	BEGIN
+		ALTER TABLE Professeur
+		DROP CONSTRAINT FK_Professeur_Utilisateur;
+	END
+
+IF EXISTS (
+	SELECT 1
+	FROM sys.foreign_keys
+	WHERE NAME = 'FK_Administrateur_Utilisateur'
+	)
+	BEGIN
+		ALTER TABLE Administrateur
+		DROP CONSTRAINT FK_Administrateur_Utilisateur;
+	END
+
+
 
 
 DROP TABLE IF EXISTS Note;
@@ -162,6 +183,8 @@ DROP TABLE IF EXISTS CoursPrerequis;
 DROP TABLE IF EXISTS CoursProgramme;
 DROP TABLE IF EXISTS Restreindre;
 DROP TABLE IF EXISTS Enseigner;
+DROP TABLE IF EXISTS Utilisateur;
+DROP TABLE IF EXISTS Administrateur;
 DROP TABLE IF EXISTS Etudiant;
 DROP TABLE IF EXISTS Specialisation;
 DROP TABLE IF EXISTS Professeur;
@@ -193,26 +216,38 @@ CREATE TABLE Specialisation (
 	CONSTRAINT PK_Specialisation PRIMARY KEY (id_Spec),
 	CONSTRAINT FK_Specialisation_Programme FOREIGN KEY (id_Prog_Spec) REFERENCES Programme(id_Prog)
 )
+CREATE TABLE Utilisateur (
+	id_User INT  IDENTITY (3, 100),
+	nom_User VARCHAR(15) NOT NULL,
+	prenom_User VARCHAR(20) NOT NULL,
+	dateInscriptUser DATE NOT NULL DEFAULT GETDATE(),
+	mat_Etud AS (CAST(YEAR(dateInscriptUser) AS VARCHAR(4)) +
+	RIGHT('00' + CAST(MONTH(dateInscriptUser) AS VARCHAR(2)), 2) +
+	RIGHT('0000' + CAST(id_User AS VARCHAR(4)), 4)) PERSISTED UNIQUE,
+	dateNais_User Date NOT NULL,
+	numTel_User VARCHAR(15),
+	CHECK(numTel_User LIKE '\([1-9][0-9][0-9]\)-[1-9][0-9][0-9]-[1-9][0-9][0-9][0-9]' ESCAPE '\'  AND LEN(numTel_User) = 16),
+	courriel_User VARCHAR(30),
+	CHECK(courriel_User LIKE '[A-Za-z0-9._]___%@[A-Za-z0-9]___%.[A-Za-z0-9]_%'), 
+	adresse_User  VARCHAR(80),
+	CONSTRAINT PK_Utilisateur PRIMARY KEY(id_User)
+)
+
+CREATE TABLE Administrateur (
+	id_User INT NOT NULL,
+	role_Admin_Etud VARCHAR(30) NOT NULL,
+	CONSTRAINT PK_Administarteur PRIMARY KEY (id_User),
+	CONSTRAINT FK_Administrateur_Utilisateur FOREIGN KEY(id_User) REFERENCES Utilisateur(id_User),
+)
 
 -- 3-) Table Etudiant
 CREATE TABLE Etudiant (
-	id_Etud INT IDENTITY(100, 1) NOT NULL,
-	dateInscriptProg DATE NOT NULL DEFAULT GETDATE(),
-	mat_Etud AS (CAST(YEAR(dateInscriptProg) AS VARCHAR(4)) +
-	RIGHT('00' + CAST(MONTH(dateInscriptProg) AS VARCHAR(2)), 2) +
-	RIGHT('0000' + CAST(id_Etud AS VARCHAR(4)), 4)) PERSISTED UNIQUE,
-	nom_Etud VARCHAR(30) NOT NULL,
-	prenom_Etud VARCHAR(30),
-	dateNais_Etud DATE NOT NULL,
-	numTel_Etud VARCHAR(15),
-	CHECK(numTel_Etud LIKE '\([1-9][0-9][0-9]\)-[0-9][0-9][0-9]-[1-9][0-9][0-9][0-9]' ESCAPE '\' AND LEN(numTel_Etud) = 14 ),
-	courriel_Etud VARCHAR(30),
-	CHECK(courriel_Etud LIKE '[A-Za-z0-9._]___%@[A-Za-z0-9]___%.[A-Za-z0-9]_%'),
-	adresse_Etud VARCHAR(80) NOT NULL,
+	id_User INT NOT NULL,
 	statut_Etud VARCHAR(30) NOT NULL,
 	programme_Etud INT NOT NULL,
-	CONSTRAINT PK_Etudiant PRIMARY KEY (id_Etud),
+	CONSTRAINT PK_Etudiant PRIMARY KEY (id_User),
 	CONSTRAINT FK_Etudiant_Programme FOREIGN KEY(programme_Etud) REFERENCES Programme(id_Prog),
+	CONSTRAINT FK_Etudiant_Utilisateur FOREIGN KEY(id_User) REFERENCES Utilisateur(id_User)
 )
 
 -- 4 Création de la table Cours 
@@ -314,25 +349,15 @@ CREATE TABLE Evaluation (
 -- 11-) Création de la table Professeur
 
 CREATE TABLE Professeur (
-	id_Prof INT IDENTITY(4, 1000),
-	dateEmb_Prof DATE NOT NULL DEFAULT GETDATE(),
-	code_Prof AS (CAST(YEAR(dateEmb_Prof) AS VARCHAR(4)) +
-	RIGHT('00' + CAST(MONTH(dateEmb_Prof) AS VARCHAR(2)), 2) +
-	RIGHT('0000' + CAST(id_Prof AS VARCHAR(4)), 4)) PERSISTED UNIQUE,
-	nom_Prof VARCHAR(15) NOT NULL,
-	prenom_Prof VARCHAR(20) NOT NULL,
-	dateNais_Prof Date NOT NULL,
-	numTel_Prof VARCHAR(15),
-	CHECK(numTel_Prof LIKE '\([1-9][0-9][0-9]\)-[1-9][0-9][0-9]-[1-9][0-9][0-9][0-9]' ESCAPE '\'  AND LEN(numTel_Prof) = 16),
-	courriel_Prof VARCHAR(30),
-	CHECK(courriel_Prof LIKE '[A-Za-z0-9._]___%@[A-Za-z0-9]___%.[A-Za-z0-9]_%'), 
-	adresse_Prof  VARCHAR(80),
+	id_User INT NOT NULL,
 	grade_Prof VARCHAR(50) DEFAULT 'Chargé de cours',
 	statut_Prof VARCHAR(30) DEFAULT 'Permanent',
-	CONSTRAINT PK_Professeur PRIMARY KEY(id_Prof),
+	CONSTRAINT PK_Professeur PRIMARY KEY(id_User),
+	CONSTRAINT FK_Professeur_Utilisateur FOREIGN KEY(id_User) REFERENCES Utilisateur(id_User),
 	CONSTRAINT CK_Professeur_grade_Prof CHECK(grade_Prof IN('Professeur Emerite', 'Professeur agrégé', 'Professeur titulaire','Maître de conférence', 'Chargé de cours', 'Auxilliaire de cours')),
 	CONSTRAINT CK_Professeur_statut_Prof CHECK(statut_Prof IN('Permanent', 'contractuel', 'temps plein', 'temps partiel', 'Invité', 'Retraité actif'))
 )
+
 
 -- 12-) Création de la table ChoixSpecialisation
 
@@ -343,7 +368,7 @@ CREATE TABLE ChoixSpecialisation (
 	id_Etud INT NOT NULL,
 	id_Spec INT NOT NULL,
 	CONSTRAINT PK_ChoixSpecialisation PRIMARY KEY(id_ChoixSpec),
-	CONSTRAINT FK_ChoixSpecialisation_Etudiant FOREIGN KEY(id_Etud) REFERENCES Etudiant(id_Etud),
+	CONSTRAINT FK_ChoixSpecialisation_Etudiant FOREIGN KEY(id_Etud) REFERENCES Etudiant(id_User),
 	CONSTRAINT FK_ChoixSpecialisation_Specialisation FOREIGN KEY(id_Spec) REFERENCES Specialisation(id_Spec)
 )
 
@@ -362,7 +387,7 @@ CREATE TABLE Inscription (
 	id_Etud INT NOT NULL,
 	id_CoursOf INT NOT NULL,
 	CONSTRAINT PK_Inscription PRIMARY KEY(id_Inscript),
-	CONSTRAINT FK_Inscription_Etudiant FOREIGN KEY(id_Etud) REFERENCES Etudiant(id_Etud),
+	CONSTRAINT FK_Inscription_Etudiant FOREIGN KEY(id_Etud) REFERENCES Etudiant(id_User),
 	CONSTRAINT FK_Inscription_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf)
 )
 -- 14 -) Création de la table Note
@@ -402,7 +427,7 @@ CREATE TABLE Enseigner (
 	id_Prof INT NOT NULL,
 	id_CoursOf INT NOT NULL,
 	CONSTRAINT PK_Enseigner PRIMARY KEY(id_Enseigner),
-	CONSTRAINT FK_Enseigner_Professeur FOREIGN KEY(id_Prof) REFERENCES Professeur(id_Prof),
+	CONSTRAINT FK_Enseigner_Professeur FOREIGN KEY(id_Prof) REFERENCES Professeur(id_User),
 	CONSTRAINT FK_Enseigner_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf)
 	)
 
@@ -455,28 +480,52 @@ VALUES
 SET @id_Spec = SCOPE_IDENTITY()
 
 -- 3- Insertion dans la table Etudiant x 10
-DECLARE @sql_Etud NVARCHAR(MAX) = '';
+DECLARE @sql_User NVARCHAR(MAX) = '';
 
-SELECT @sql_Etud += 
-'ALTER TABLE Etudiant DROP CONSTRAINT ' + name + ';'
+SELECT @sql_User += 
+'ALTER TABLE Utilisateur DROP CONSTRAINT ' + name + ';'
 FROM sys.check_constraints
-WHERE parent_object_id = OBJECT_ID('Etudiant');
+WHERE parent_object_id = OBJECT_ID('Utilisateur');
 
-EXEC(@sql_Etud);
+EXEC(@sql_User);
 
-INSERT INTO Etudiant
-(nom_Etud, prenom_Etud, dateNais_Etud, numTel_Etud, courriel_Etud, adresse_Etud, statut_Etud, programme_Etud)
+INSERT INTO Utilisateur(nom_User, prenom_User, dateNais_User, numTel_User, courriel_User, adresse_User ) 
+VALUES 
+	('Dupont','Jean','2004-05-12','(514)-123-4567','jean.dupont@yahoo.com','Montréal'),
+	('Heumen','Gaius','1999-08-08','(581)-123-4567','gaius@gmail.com','Montréal'),
+	('Martin','Paul','2003-01-10','(438)-111-2222','paul.martin@gmail.com','Laval'),
+	('Nguyen','Lan','2002-07-21','(514)-333-4444','lan.nguyen@gmail.com','Montréal'),
+	('Roy','Sophie','2001-12-30','(450)-555-6666','sophie.roy@gmail.com','Longueuil'),
+	('Smith','John','2000-03-15','(819)-777-8888','john.smith@gmail.com','Gatineau'),
+	('Diallo','Aminata','2004-09-09','(514)-999-0000','aminata@gmail.com','Montréal'),
+	('Chen','Li','2003-11-11','(438)-222-3333','li.chen@gmail.com','Montréal'),
+	('Garcia','Luis','2002-06-06','(450)-444-5555','luis@gmail.com','Brossard'),
+	('Tremblay','Marc','2001-02-02','(418)-666-7777','marc@gmail.com','Québec'),
+	('Durand','Pierre','1975-05-05','(514)-111-1111','p.durand@gmail.com','Montréal'),
+	('Lefevre','Claire','1980-02-02','(514)-222-2222','c.lefevre@gmail.com','Montréal'),
+	('Smith','Robert','1970-03-03','(819)-333-3333','r.smith@gmail.com','Gatineau'),
+	('Khan','Ali','1985-04-04','(450)-444-4444','ali.khan@gmail.com','Laval'),
+	('Dubois','Marie','1978-06-06','(418)-555-5555','m.dubois@gmail.com','Québec'),
+	('Nguyen','Minh','1982-07-07','(514)-666-6666','minh@gmail.com','Montréal'),
+	('Roy','Luc','1969-08-08','(514)-777-7777','luc.roy@gmail.com','Montréal'),
+	('Garcia','Ana','1983-09-09','(438)-888-8888','ana@gmail.com','Montréal'),
+	('Chen','Wei','1977-10-10','(514)-999-9999','wei@gmail.com','Montréal'),
+	('Diallo','Moussa','1981-11-11','(514)-000-0000','moussa@gmail.com','Montréal');
+
+/* INSERT INTO Etudiant
+(statut_Etud, programme_Etud)
 VALUES
-	('Dupont','Jean','2004-05-12','(514)-123-4567','jean.dupont@yahoo.com','Montréal','Actif',1001),
-	('Heumen','Gaius','1999-08-08','(581)-123-4567','gaius@gmail.com','Montréal','Actif',1000),
-	('Martin','Paul','2003-01-10','(438)-111-2222','paul.martin@gmail.com','Laval','Actif',1002),
-	('Nguyen','Lan','2002-07-21','(514)-333-4444','lan.nguyen@gmail.com','Montréal','Actif',1005),
-	('Roy','Sophie','2001-12-30','(450)-555-6666','sophie.roy@gmail.com','Longueuil','Actif',1003),
-	('Smith','John','2000-03-15','(819)-777-8888','john.smith@gmail.com','Gatineau','Actif',1004),
-	('Diallo','Aminata','2004-09-09','(514)-999-0000','aminata@gmail.com','Montréal','Actif',1006),
-	('Chen','Li','2003-11-11','(438)-222-3333','li.chen@gmail.com','Montréal','Actif',1007),
-	('Garcia','Luis','2002-06-06','(450)-444-5555','luis@gmail.com','Brossard','Actif',1008),
-	('Tremblay','Marc','2001-02-02','(418)-666-7777','marc@gmail.com','Québec','Actif',1009);
+	('Actif',1001),
+	('Actif',1000),
+	('Actif',1002),
+	('Actif',1005),
+	('Actif',1003),
+	('Actif',1004),
+	('Actif',1006),
+	('Actif',1007),
+	('Actif',1008),
+	('Actif',1009);
+*/
 
 -- 4- Insertion dans la table ChoixSpecialisation x 10
 
@@ -547,6 +596,7 @@ VALUES
 
 -- 12- Insertion dans la table Professeur x 10
 
+/*
 DECLARE @sql_Prof NVARCHAR(MAX) = '';
 
 SELECT @sql_Prof += 
@@ -554,21 +604,16 @@ SELECT @sql_Prof +=
 FROM sys.check_constraints
 WHERE parent_object_id = OBJECT_ID('Professeur');
 
+
+
 EXEC(@sql_Prof);
 
+*/
 
-INSERT INTO Professeur(nom_Prof, prenom_Prof, dateNais_Prof, numTel_Prof, courriel_Prof, adresse_Prof)
-VALUES
-	('Durand','Pierre','1975-05-05','(514)-111-1111','p.durand@gmail.com','Montréal'),
-	('Lefevre','Claire','1980-02-02','(514)-222-2222','c.lefevre@gmail.com','Montréal'),
-	('Smith','Robert','1970-03-03','(819)-333-3333','r.smith@gmail.com','Gatineau'),
-	('Khan','Ali','1985-04-04','(450)-444-4444','ali.khan@gmail.com','Laval'),
-	('Dubois','Marie','1978-06-06','(418)-555-5555','m.dubois@gmail.com','Québec'),
-	('Nguyen','Minh','1982-07-07','(514)-666-6666','minh@gmail.com','Montréal'),
-	('Roy','Luc','1969-08-08','(514)-777-7777','luc.roy@gmail.com','Montréal'),
-	('Garcia','Ana','1983-09-09','(438)-888-8888','ana@gmail.com','Montréal'),
-	('Chen','Wei','1977-10-10','(514)-999-9999','wei@gmail.com','Montréal'),
-	('Diallo','Moussa','1981-11-11','(514)-000-0000','moussa@gmail.com','Montréal');
+
+--INSERT INTO Professeur(id_User, id_User)
+--VALUES
+--	(100, 100);
 
 -- 13- Insertion dans la table Enseigner x 10
 
