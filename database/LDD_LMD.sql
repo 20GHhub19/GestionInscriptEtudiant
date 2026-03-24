@@ -217,7 +217,7 @@ CREATE TABLE Specialisation (
 	CONSTRAINT FK_Specialisation_Programme FOREIGN KEY (id_Prog_Spec) REFERENCES Programme(id_Prog)
 )
 CREATE TABLE Utilisateur (
-	id_User INT  IDENTITY (3, 100),
+	id_User INT  IDENTITY (100, 1),
 	nom_User VARCHAR(15) NOT NULL,
 	prenom_User VARCHAR(20) NOT NULL,
 	dateInscriptUser DATE NOT NULL DEFAULT GETDATE(),
@@ -489,6 +489,7 @@ WHERE parent_object_id = OBJECT_ID('Utilisateur');
 
 EXEC(@sql_User);
 
+DECLARE @id_User INT
 INSERT INTO Utilisateur(nom_User, prenom_User, dateNais_User, numTel_User, courriel_User, adresse_User ) 
 VALUES 
 	('Dupont','Jean','2004-05-12','(514)-123-4567','jean.dupont@yahoo.com','Montréal'),
@@ -512,20 +513,15 @@ VALUES
 	('Chen','Wei','1977-10-10','(514)-999-9999','wei@gmail.com','Montréal'),
 	('Diallo','Moussa','1981-11-11','(514)-000-0000','moussa@gmail.com','Montréal');
 
-/* INSERT INTO Etudiant
-(statut_Etud, programme_Etud)
+SET @id_User =SCOPE_IDENTITY()
+
+
+INSERT INTO Etudiant
+(id_User, statut_Etud, programme_Etud)
 VALUES
-	('Actif',1001),
-	('Actif',1000),
-	('Actif',1002),
-	('Actif',1005),
-	('Actif',1003),
-	('Actif',1004),
-	('Actif',1006),
-	('Actif',1007),
-	('Actif',1008),
-	('Actif',1009);
-*/
+	(@id_User, 'Actif',1001), (@id_User, 'Actif',1000), (@id_User, 'Actif',1002), (@id_User, 'Actif',1005),
+	(@id_User, 'Actif',1003), (@id_User, 'Actif',1004), (@id_User, 'Actif',1006),(@id_User, 'Actif',1007),
+	(@id_User, 'Actif',1008), (@id_User, 'Actif',1009);
 
 -- 4- Insertion dans la table ChoixSpecialisation x 10
 
