@@ -134,6 +134,14 @@ CREATE TABLE Specialisation (
 	CONSTRAINT FK_Specialisation_Programme FOREIGN KEY (id_Prog_Spec) REFERENCES Programme(id_Prog)
 )
 
+INSERT INTO Specialisation(nom_Spec, descript_Spec, nbCredit_Spec, id_Prog_Spec)
+VALUES
+('Développement web', 'Spécialisation en développement d''applications web modernes', 30, 1000),
+('Intelligence artificielle', 'Spécialisation en IA et apprentissage automatique', 30, 1000),
+('Sécurité informatique', 'Spécialisation en cybersécurité et protection des systèmes', 30, 1000),
+('Administration réseaux', 'Spécialisation en gestion et administration des réseaux', 24, 1001),
+('Infonuagique', 'Spécialisation en services cloud et virtualisation', 24, 1001);
+
 -- 3-) Table Etudiant
 CREATE TABLE Etudiant (
 	id_Etud INT IDENTITY(100, 1) NOT NULL,
@@ -224,6 +232,15 @@ CREATE TABLE Semestre (
 	CONSTRAINT PK_Semestre PRIMARY KEY(id_Semest)
 )
 
+INSERT INTO Semestre(nom_Semest, annee_Semest, datDeb_Semest, dateFin_Semest)
+VALUES
+('Automne', '2023', '2023-09-05', '2023-12-20'),
+('Hiver', '2024', '2024-01-15', '2024-05-10'),
+('Été', '2024', '2024-05-20', '2024-08-15'),
+('Automne', '2024', '2024-09-03', '2024-12-19'),
+('Hiver', '2025', '2025-01-13', '2025-05-09'),
+('Été', '2025', '2025-05-19', '2025-08-14');
+
 -- 8- Création de la table CoursOffert
 
 CREATE TABLE CoursOffert (
@@ -295,6 +312,15 @@ CREATE TABLE Professeur (
 	CONSTRAINT CK_Professeur_grade_Prof CHECK(grade_Prof IN('Professeur Emerite', 'Professeur agrégé', 'Professeur titulaire','Maître de conférence', 'Chargé de cours', 'Auxilliaire de cours')),
 	CONSTRAINT CK_Professeur_statut_Prof CHECK(statut_Prof IN('Permanent', 'contractuel', 'temps plein', 'temps partiel', 'Invité', 'Retraité actif'))
 )
+
+INSERT INTO Professeur(dateEmb_Prof, nom_Prof, prenom_Prof, dateNais_Prof, numTel_Prof, courriel_Prof, adresse_Prof, grade_Prof, statut_Prof)
+VALUES
+('2015-08-20', 'Tremblay', 'Marc', '1975-03-14', '(514)-555-1234', 'marc.tremblay@gmail.com', '45 Rue Laurier, Québec, QC', 'Professeur titulaire', 'Permanent'),
+('2018-01-10', 'Bouchard', 'Sophie', '1980-11-22', '(438)-555-2345', 'sophie.bouchard@gmail.com', '78 Avenue Cartier, Québec, QC', 'Professeur agrégé', 'Permanent'),
+('2020-06-01', 'Nguyen', 'Thanh', '1985-07-09', '(581)-555-3456', 'thanh.nguyen@gmail.com', '12 Rue Saint-Jean, Québec, QC', 'Maître de conférence', 'temps plein'),
+('2021-09-15', 'Gagnon', 'Pierre', '1990-01-30', '(418)-555-4567', 'pierre.gagnon@gmail.com', '90 Boulevard René-Lévesque, Québec, QC', 'Chargé de cours', 'contractuel'),
+('2019-03-05', 'Roy', 'Isabelle', '1978-06-18', '(514)-555-5678', 'isabelle.roy@gmail.com', '33 Rue Dalhousie, Québec, QC', 'Professeur agrégé', 'Permanent'),
+('2022-08-22', 'Lavoie', 'Jean', '1988-12-03', '(438)-555-6789', 'jean.lavoie@gmail.com', '55 Avenue Maguire, Québec, QC', 'Chargé de cours', 'temps partiel');
 
 -- 12-) Création de la table ChoixSpecialisation
 
