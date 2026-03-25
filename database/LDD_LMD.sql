@@ -383,7 +383,7 @@ CREATE TABLE Inscription (
 	noteLet_Inscript VARCHAR(2),
 	decisionFi_Inscript VARCHAR(20),
 	tentative_Inscript INT DEFAULT 1,
-	estValidePrerequis_Inscript BIT NOT NULL DEFAULT 0,
+	estValidePrerequis_Inscript BIT,
 	id_Etud INT NOT NULL,
 	id_CoursOf INT NOT NULL,
 	CONSTRAINT PK_Inscription PRIMARY KEY(id_Inscript),
@@ -516,7 +516,14 @@ INSERT INTO Administrateur
 VALUES
 	(104, 'Gestionnaire du site'),
 	(108, 'Administrateur d''applications')
--- 4- Insertion dans la table ChoixSpecialisation x 10
+-- 4- Insertion dans la table ChoixSpecialisation x 16
+INSERT INTO ChoixSpecialisation
+	(date_ChoixSpec, nb_ChoixSpec, id_Etud, id_Spec)
+VALUES
+	('2024-01-15', 1, 100, 10), ('2024-01-15', 2, 100, 10), ('2024-01-16', 1, 102, 12), ('2024-01-16', 2, 102, 10),
+	('2024-01-17', 1, 105, 13), ('2024-01-18', 1, 115, 14), ('2024-01-18', 2, 115, 16), ('2024-01-19', 1, 109, 15),
+	('2024-01-20', 1, 103, 16), ('2024-01-20', 2, 103, 17), ('2024-01-21', 1, 108, 17), ('2024-01-22', 1, 112, 18),
+	('2024-01-22', 2, 112, 19), ('2024-01-23', 1, 117, 10), ('2024-01-24', 1, 110, 11), ('2024-01-24', 2, 110, 13);
 
 
 -- 5- Insertion dans la table Cours x 10
@@ -572,7 +579,7 @@ VALUES
 	(40,'Lun 09H-12H','A101','2024-01-10','2024-04-20',1),
 	(35,'Mar 09H-12H','A102','2024-01-10','2024-04-20',2),
 	(30,'Mer 09H-12H','A103','2024-01-10','2024-04-20',3),
-	(25,'Jeu 09-12','A104','2024-01-10','2024-04-20',4),
+	(25,'Jeu 09H-12H','A104','2024-01-10','2024-04-20',4),
 	(40,'Ven 09H-12H','A105','2024-01-10','2024-04-20',5),
 	(30,'Lun 13H-16H','B101','2024-01-10','2024-04-20',6),
 	(30,'Mar 13H-16H','B102','2024-01-10','2024-04-20',7),
@@ -582,6 +589,20 @@ VALUES
 
 
 -- 11- Insertion dans la table Inscription x 10
+INSERT INTO Inscription
+	(statut_Inscript, date_Desinscript, noteFi_Inscript, noteLet_Inscript, decisionFi_Inscript, 
+	tentative_Inscript, estValidePrerequis_Inscript, id_Etud, id_CoursOf)
+VALUES
+	('Inscrit', NULL, 18.80, 'A', 'Réussi', 0, 1, 100, 5 ),
+	('Inscrit', NULL, 15.50, 'B', 'Réussi', 1, 1, 102, 3),
+	('Inscrit', NULL, 9.75, 'C', 'Échec', 2, 1, 105, 7),
+	('Annulé', '2024-02-15', NULL, NULL, 'Abandon', 1, NULL, 109, 2),
+	('Inscrit', NULL, 17.20, 'A', 'Réussi', 1, 1, 115, 5),
+	('Inscrit', NULL, 11.00, 'C', 'Réussi', 1, 1, 103, 1),
+	('Annulé', '2024-03-01', NULL, NULL, 'Abandon', 1, 0, 108, 4),
+	('Inscrit', NULL, 13.40, 'B', 'Réussi', 1, 1, 112, 6),
+	('Inscrit', NULL, 8.90, 'D', 'Échec', 3, 1, 117, 9),
+	('Inscrit', NULL, 16.75, 'A', 'Réussi', 1, 1, 110, 8);
 
 -- 12- Insertion dans la table Professeur x 10
 INSERT INTO Professeur(id_User)
@@ -589,9 +610,79 @@ VALUES
 	(109), (113), (118), (119);
 
 -- 13- Insertion dans la table Enseigner x 10
+INSERT INTO Enseigner
+	(nbH_Enseigner, datDeb_Enseigner, dateFin_Enseigner, id_Prof, id_CoursOf)
+VALUES
+	(45, '2024-01-10', '2024-04-20', 109, 1),
+	(45, '2024-01-10', '2024-04-20', 113, 2),
+	(45, '2024-01-10', '2024-04-20', 118, 3),
+	(45, '2024-01-10', '2024-04-20', 119, 4),
+	(60, '2024-01-10', '2024-04-20', 109, 5),
+	(60, '2024-01-10', '2024-04-20', 113, 6),
+	(45, '2024-01-10', '2024-04-20', 118, 7),
+	(45, '2024-01-10', '2024-04-20', 119, 8),
+	(30, '2024-01-10', '2024-04-20', 109, 9),
+	(30, '2024-01-10', '2024-04-20', 113, 10);
+
 
 -- 14- Insertion dans la table SessionExamen x 10
 
--- 15- Insertion dans la table Evaluation x 10
+INSERT INTO SessionExamen 
+	(type_SessExam, dateDeb, dateFin, id_Semest)
+VALUES
+	('Intra',  '2024-02-20', '2024-02-25', 1),
+	('Final',  '2024-04-15', '2024-04-20', 1),
+	('Intra',  '2024-06-20', '2024-06-25', 2),
+	('Final',  '2024-08-15', '2024-08-20', 2),
+	('Intra',  '2024-10-20', '2024-10-25', 3),
+	('Final',  '2024-12-15', '2024-12-20', 3),
+	('Intra',  '2025-02-20', '2025-02-25', 4),
+	('Final',  '2025-04-15', '2025-04-20', 4),
+	('Intra',  '2025-06-20', '2025-06-25', 5),
+	('Final',  '2025-08-15', '2025-08-20', 5);
 
--- 16- Insertion dans la table Note x 10
+-- 15- Insertion dans la table Evaluation x 10
+INSERT INTO Evaluation
+	(type_Eval, date_Eval, nom_Eval, poids_Eval, descript_Eval, id_CoursOf, id_SessExam)
+VALUES
+	-- Cours 1
+	('Travaux Pratiques 1', '2024-01-25', 'TP1', 10.00, 'Premier TP', 1, 1),
+	('Quiz', '2024-02-01', 'Quiz 1', 5.00, 'Quiz de début', 1, 1),
+	('Intra', '2024-02-22', 'Examen Intra', 30.00, 'Examen de mi-session', 1, 1),
+	('Examen final', '2024-04-18', 'Examen Final', 40.00, 'Examen final', 1, 2),
+
+	-- Cours 2
+	('Travaux Pratiques 1', '2024-01-28', 'TP1', 10.00, 'Premier TP', 2, 1),
+	('Quiz', '2024-02-03', 'Quiz 1', 5.00, 'Quiz de début', 2, 1),
+	('Intra', '2024-02-23', 'Examen Intra', 30.00, 'Examen de mi-session', 2, 1),
+	('Examen final', '2024-04-19', 'Examen Final', 40.00, 'Examen final', 2, 2),
+
+	-- Cours 3
+	('Travaux Pratiques 1', '2024-01-30', 'TP1', 10.00, 'Premier TP', 3, 1),
+	('Quiz', '2024-02-05', 'Quiz 1', 5.00, 'Quiz de début', 3, 1),
+	('Intra', '2024-02-24', 'Examen Intra', 30.00, 'Examen de mi-session', 3, 1),
+	('Examen final', '2024-04-20', 'Examen Final', 40.00, 'Examen final', 3, 2);
+
+-- 16- Insertion dans la table Note x 18
+INSERT INTO Note
+	(valNum_Note, ValLettre_Note, retroAction, dateAttrib_Note, id_Inscript, id_Eval)
+VALUES
+	(18.5, 'B', 'Bon travail', '2024-02-21', 10, 1),
+	(16.0, 'B', 'Peut mieux faire', '2024-02-22', 10, 2),
+	(12.5, 'C', 'Besoin de pratique', '2024-02-22', 12, 3),
+	(14.0, 'C', 'Correct', '2024-02-23', 12, 4),
+	(19.0, 'A', 'Excellent', '2024-02-23', 13, 5),
+	(17.0, 'B', 'Bien', '2024-02-24', 13, 6),
+	(11.0, 'D', 'Insuffisant', '2024-02-24', 14, 7),
+	(13.5, 'C', 'Correct', '2024-02-25', 14, 8),
+	(15.0, 'C', 'Assez bien', '2024-02-25', 15, 9),
+	(16.5, 'B', 'Bien', '2024-02-26', 15, 10),
+	(20.0, 'A', 'Excellent', '2024-02-26', 16, 11),
+	(18.0, 'B', 'Très bien', '2024-02-27', 16, 12),
+	(14.0, 'C', 'Correct', '2024-02-27', 17, 1),
+	(12.0, 'C', 'Besoin de pratique', '2024-02-28', 17, 2),
+	(10.5, 'D', 'Juste suffisant', '2024-02-28', 18, 3),
+	(13.0, 'C', 'Correct', '2024-02-29', 18, 4),
+	(17.5, 'B', 'Bien', '2024-02-29', 19, 5),
+	(19.0, 'A', 'Excellent', '2024-03-01', 19, 6);
+	
