@@ -217,18 +217,18 @@ CREATE TABLE Specialisation (
 	CONSTRAINT FK_Specialisation_Programme FOREIGN KEY (id_Prog_Spec) REFERENCES Programme(id_Prog)
 )
 CREATE TABLE Utilisateur (
-	id_User INT  IDENTITY (3, 100),
+	id_User INT  IDENTITY (100, 1),
 	nom_User VARCHAR(15) NOT NULL,
 	prenom_User VARCHAR(20) NOT NULL,
 	dateInscriptUser DATE NOT NULL DEFAULT GETDATE(),
-	mat_Etud AS (CAST(YEAR(dateInscriptUser) AS VARCHAR(4)) +
+	mat_User AS (CAST(YEAR(dateInscriptUser) AS VARCHAR(4)) +
 	RIGHT('00' + CAST(MONTH(dateInscriptUser) AS VARCHAR(2)), 2) +
 	RIGHT('0000' + CAST(id_User AS VARCHAR(4)), 4)) PERSISTED UNIQUE,
 	dateNais_User Date NOT NULL,
 	numTel_User VARCHAR(15),
-	CHECK(numTel_User LIKE '\([1-9][0-9][0-9]\)-[1-9][0-9][0-9]-[1-9][0-9][0-9][0-9]' ESCAPE '\'  AND LEN(numTel_User) = 16),
+	CHECK(numTel_User IS NULL OR numTel_User LIKE '[1-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
 	courriel_User VARCHAR(30),
-	CHECK(courriel_User LIKE '[A-Za-z0-9._]___%@[A-Za-z0-9]___%.[A-Za-z0-9]_%'), 
+	CHECK(courriel_User LIKE '%_@_%._%'), 
 	adresse_User  VARCHAR(80),
 	CONSTRAINT PK_Utilisateur PRIMARY KEY(id_User)
 )
@@ -463,7 +463,6 @@ VALUES
 
 -- 2- Insertion dans la table Specialisation x 10
 
-DECLARE @id_Spec INT
 INSERT INTO Specialisation(nom_Spec, descript_Spec, nbCredit_Spec, id_Prog_Spec)
 VALUES
 	('IA','Intelligence artificielle',30,1005),
@@ -477,56 +476,46 @@ VALUES
 	('Administration','Systèmes serveurs',30,1008),
 	('Cybersécurité','Sécurité offensive',30,1003);
 
-SET @id_Spec = SCOPE_IDENTITY()
 
--- 3- Insertion dans la table Etudiant x 10
-DECLARE @sql_User NVARCHAR(MAX) = '';
-
-SELECT @sql_User += 
-'ALTER TABLE Utilisateur DROP CONSTRAINT ' + name + ';'
-FROM sys.check_constraints
-WHERE parent_object_id = OBJECT_ID('Utilisateur');
-
-EXEC(@sql_User);
 
 INSERT INTO Utilisateur(nom_User, prenom_User, dateNais_User, numTel_User, courriel_User, adresse_User ) 
 VALUES 
-	('Dupont','Jean','2004-05-12','(514)-123-4567','jean.dupont@yahoo.com','Montréal'),
-	('Heumen','Gaius','1999-08-08','(581)-123-4567','gaius@gmail.com','Montréal'),
-	('Martin','Paul','2003-01-10','(438)-111-2222','paul.martin@gmail.com','Laval'),
-	('Nguyen','Lan','2002-07-21','(514)-333-4444','lan.nguyen@gmail.com','Montréal'),
-	('Roy','Sophie','2001-12-30','(450)-555-6666','sophie.roy@gmail.com','Longueuil'),
-	('Smith','John','2000-03-15','(819)-777-8888','john.smith@gmail.com','Gatineau'),
-	('Diallo','Aminata','2004-09-09','(514)-999-0000','aminata@gmail.com','Montréal'),
-	('Chen','Li','2003-11-11','(438)-222-3333','li.chen@gmail.com','Montréal'),
-	('Garcia','Luis','2002-06-06','(450)-444-5555','luis@gmail.com','Brossard'),
-	('Tremblay','Marc','2001-02-02','(418)-666-7777','marc@gmail.com','Québec'),
-	('Durand','Pierre','1975-05-05','(514)-111-1111','p.durand@gmail.com','Montréal'),
-	('Lefevre','Claire','1980-02-02','(514)-222-2222','c.lefevre@gmail.com','Montréal'),
-	('Smith','Robert','1970-03-03','(819)-333-3333','r.smith@gmail.com','Gatineau'),
-	('Khan','Ali','1985-04-04','(450)-444-4444','ali.khan@gmail.com','Laval'),
-	('Dubois','Marie','1978-06-06','(418)-555-5555','m.dubois@gmail.com','Québec'),
-	('Nguyen','Minh','1982-07-07','(514)-666-6666','minh@gmail.com','Montréal'),
-	('Roy','Luc','1969-08-08','(514)-777-7777','luc.roy@gmail.com','Montréal'),
-	('Garcia','Ana','1983-09-09','(438)-888-8888','ana@gmail.com','Montréal'),
-	('Chen','Wei','1977-10-10','(514)-999-9999','wei@gmail.com','Montréal'),
-	('Diallo','Moussa','1981-11-11','(514)-000-0000','moussa@gmail.com','Montréal');
+	('Dupont','Jean','2004-05-12','5141234567','jean.dupont@yahoo.com','Montréal'),
+	('Heumen','Gaius','1999-08-08','5811234567','gaius@gmail.com','Montréal'),
+	('Martin','Paul','2003-01-10','4381112222','paul.martin@gmail.com','Laval'),
+	('Nguyen','Lan','2002-07-21','5143334444','lan.nguyen@gmail.com','Montréal'),
+	('Roy','Sophie','2001-12-30','4505556666','sophie.roy@gmail.com','Longueuil'),
+	('Smith','John','2000-03-15','8197778888','john.smith@gmail.com','Gatineau'),
+	('Diallo','Aminata','2004-09-09','5149990000','aminata@gmail.com','Montréal'),
+	('Chen','Li','2003-11-11','4382223333','li.chen@gmail.com','Montréal'),
+	('Garcia','Luis','2002-06-06','4504445555','luis@gmail.com','Brossard'),
+	('Tremblay','Marc','2001-02-02','4186667777','marc@gmail.com','Québec'),
+	('Durand','Pierre','1975-05-05','5141111111','p.durand@gmail.com','Montréal'),
+	('Lefevre','Claire','1980-02-02','5142222222','c.lefevre@gmail.com','Montréal'),
+	('Smith','Robert','1970-03-03','8193333333','r.smith@gmail.com','Gatineau'),
+	('Khan','Ali','1985-04-04','4504444444','ali.khan@gmail.com','Laval'),
+	('Dubois','Marie','1978-06-06','4185555555','m.dubois@gmail.com','Québec'),
+	('Nguyen','Minh','1982-07-07','5146666666','minh@gmail.com','Montréal'),
+	('Roy','Luc','1969-08-08','5147777777','luc.roy@gmail.com','Montréal'),
+	('Garcia','Ana','1983-09-09','4388888888','ana@gmail.com','Montréal'),
+	('Chen','Wei','1977-10-10','5149999999','wei@gmail.com','Montréal'),
+	('Diallo','Moussa','1981-11-11','5140000000','moussa@gmail.com','Montréal');
 
-/* INSERT INTO Etudiant
-(statut_Etud, programme_Etud)
+
+
+INSERT INTO Etudiant
+(id_User, statut_Etud, programme_Etud)
 VALUES
-	('Actif',1001),
-	('Actif',1000),
-	('Actif',1002),
-	('Actif',1005),
-	('Actif',1003),
-	('Actif',1004),
-	('Actif',1006),
-	('Actif',1007),
-	('Actif',1008),
-	('Actif',1009);
-*/
+	(100, 'Inactif',1001), (102, 'Actif',1000), (105, 'Actif',1002), (115, 'Actif',1005),
+	(109, 'Actif',1003), (103, 'Inactif',1004), (108, 'Inactif',1006),(112, 'Actif',1007),
+	(117, 'Actif',1008), (110, 'Inactif',1009);
 
+-- Insertion dans la table Administrateur
+INSERT INTO Administrateur
+	(id_User, role_Admin_Etud)
+VALUES
+	(104, 'Gestionnaire du site'),
+	(108, 'Administrateur d''applications')
 -- 4- Insertion dans la table ChoixSpecialisation x 10
 
 
@@ -560,8 +549,8 @@ VALUES
 -- 8- INsertion dans la table Restreindre x 10
 INSERT INTO Restreindre(nb_Restrict, id_Spec, id_Cours)
 VALUES
-	(2,@id_Spec,6),(3,@id_Spec,4),(1,@id_Spec,10),(2,@id_Spec,5),(1,@id_Spec,3),
-	(2,@id_Spec,7),(1,@id_Spec,8),(3,@id_Spec,1),(2,@id_Spec,5),(1,@id_Spec,9);
+	(2,11,6),(3,19,4),(1,10,10),(2,13,5),(1,16,3),
+	(2,17,7),(1,13,8),(3,15,1),(2,18,5),(1,11,9);
 
 -- 9- Insertion dans la table Semestre x 10
 INSERT INTO Semestre(nom_Semest, annee_Semest, datDeb_Semest, dateFin_Semest)
@@ -595,25 +584,9 @@ VALUES
 -- 11- Insertion dans la table Inscription x 10
 
 -- 12- Insertion dans la table Professeur x 10
-
-/*
-DECLARE @sql_Prof NVARCHAR(MAX) = '';
-
-SELECT @sql_Prof += 
-'ALTER TABLE Professeur DROP CONSTRAINT ' + name + ';'
-FROM sys.check_constraints
-WHERE parent_object_id = OBJECT_ID('Professeur');
-
-
-
-EXEC(@sql_Prof);
-
-*/
-
-
---INSERT INTO Professeur(id_User, id_User)
---VALUES
---	(100, 100);
+INSERT INTO Professeur(id_User)
+VALUES
+	(109), (113), (118), (119);
 
 -- 13- Insertion dans la table Enseigner x 10
 
