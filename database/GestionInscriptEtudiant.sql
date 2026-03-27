@@ -446,7 +446,7 @@ https://www.sqlservertutorial.net/sql-server-basics/sql-server-like/
 
 --- ####################################### Insertion dans les tables ##############################################
 
--- 1 Insertion dans la table Programme x 10
+-- 1) Insertion dans la table Programme x 10
 INSERT INTO Programme(code_Prog, nom_Prog, descript_Prog, nbCredit_Prog, unite_Prog, duree_Prog)
 VALUES
 	('INF01','Informatique','Programme informatique',90,'Departement TI',3),
@@ -461,8 +461,7 @@ VALUES
 	('GAM01','Jeux vidéo','Développement jeux',90,'Departement TI',3);
 
 
--- 2- Insertion dans la table Specialisation x 10
-
+-- 2) Insertion dans la table Specialisation x 10
 DECLARE @id_Spec INT
 INSERT INTO Specialisation(nom_Spec, descript_Spec, nbCredit_Spec, id_Prog_Spec)
 VALUES
@@ -477,9 +476,10 @@ VALUES
 	('Administration','Systèmes serveurs',30,1008),
 	('Cybersécurité','Sécurité offensive',30,1003);
 
-SET @id_Spec = SCOPE_IDENTITY()
+SET @id_Spec = SCOPE_IDENTITY();
 
--- 3- Insertion dans la table Etudiant x 10
+
+-- 3) Insertion dans la table Utilisateur x 20
 DECLARE @sql_User NVARCHAR(MAX) = '';
 
 SELECT @sql_User += 
@@ -512,26 +512,30 @@ VALUES
 	('Chen','Wei','1977-10-10','(514)-999-9999','wei@gmail.com','Montréal'),
 	('Diallo','Moussa','1981-11-11','(514)-000-0000','moussa@gmail.com','Montréal');
 
-/* INSERT INTO Etudiant
-(statut_Etud, programme_Etud)
+
+-- 4) Insertion dans la table Administrateur x 2
+INSERT INTO Administrateur (id_User, role_Admin_Etud)
 VALUES
-	('Actif',1001),
-	('Actif',1000),
-	('Actif',1002),
-	('Actif',1005),
-	('Actif',1003),
-	('Actif',1004),
-	('Actif',1006),
-	('Actif',1007),
-	('Actif',1008),
-	('Actif',1009);
-*/
-
--- 4- Insertion dans la table ChoixSpecialisation x 10
+	(1803, 'Gestion des inscriptions'),
+	(1903, 'Gestion académique');
 
 
--- 5- Insertion dans la table Cours x 10
+-- 5) Insertion dans la table Etudiant x 10
+INSERT INTO Etudiant (id_User, statut_Etud, programme_Etud)
+VALUES
+	(3,    'Actif', 1001),
+	(103,  'Actif', 1000),
+	(203,  'Actif', 1002),
+	(303,  'Actif', 1005),
+	(403,  'Actif', 1003),
+	(503,  'Actif', 1004),
+	(603,  'Actif', 1006),
+	(703,  'Actif', 1007),
+	(803,  'Actif', 1008),
+	(903,  'Actif', 1009);
 
+
+-- 6) Insertion dans la table Cours x 10
 INSERT INTO Cours(code_Cours, nom_Cours, credit_Cours, type_Cours, nbHeure_Cours)
 VALUES
 	('INF01','Programmation',3,'Théorique',45),
@@ -545,39 +549,22 @@ VALUES
 	('INF09','Cybersécurité',3,'Théorique',45),
 	('INF10','Cloud',3,'Théorique',45);
 
--- 6- Insertion dans la table CoursPrerequis x 10
-INSERT INTO CoursPrerequis(id_Cours, id_Prerequis)
-VALUES
-	(2,1),(3,1),(4,2),(5,2),(6,3),
-	(7,1),(8,7),(9,4),(10,5),(6,2);
 
--- 7- Insertion dans la table CoursProgramme x 10
+-- 7) Insertion dans la table CoursProgramme x 10
 INSERT INTO CoursProgramme(id_Prog, id_Cours)
 VALUES
 	(1000,1),(1000,2),(1001,4),(1002,3),(1003,9),
 	(1004,3),(1005,6),(1006,7),(1007,8),(1008,10);
 
--- 8- INsertion dans la table Restreindre x 10
-INSERT INTO Restreindre(nb_Restrict, id_Spec, id_Cours)
-VALUES
-	(2,@id_Spec,6),(3,@id_Spec,4),(1,@id_Spec,10),(2,@id_Spec,5),(1,@id_Spec,3),
-	(2,@id_Spec,7),(1,@id_Spec,8),(3,@id_Spec,1),(2,@id_Spec,5),(1,@id_Spec,9);
 
--- 9- Insertion dans la table Semestre x 10
-INSERT INTO Semestre(nom_Semest, annee_Semest, datDeb_Semest, dateFin_Semest)
+-- 8) Insertion dans la table CoursPrerequis x 10
+INSERT INTO CoursPrerequis(id_Cours, id_Prerequis)
 VALUES
-	('Hiver','2024','2024-01-10','2024-04-20'),
-	('Été','2024','2024-05-10','2024-08-20'),
-	('Automne','2024','2024-09-01','2024-12-20'),
-	('Hiver','2025','2025-01-10','2025-04-20'),
-	('Été','2025','2025-05-10','2025-08-20'),
-	('Automne','2025','2025-09-01','2025-12-20'),
-	('Hiver','2026','2026-01-10','2026-04-20'),
-	('Été','2026','2026-05-10','2026-08-20'),
-	('Automne','2026','2026-09-01','2026-12-20'),
-	('Hiver','2027','2027-01-10','2027-04-20');
+	(2,1),(3,1),(4,2),(5,2),(6,3),
+	(7,1),(8,7),(9,4),(10,5),(6,2);
 
--- 10- Insertion dans la table CoursOffert x 10
+
+-- 9) Insertion dans la table CoursOffert x 10
 INSERT INTO CoursOffert(capacite_CoursOf, horaire_CoursOf, salle_CoursOf, dateDeb_CoursOf, dateFin_CoursOf, id_Cours)
 VALUES
 	(40,'Lun 09H-12H','A101','2024-01-10','2024-04-20',1),
@@ -592,33 +579,137 @@ VALUES
 	(20,'Ven 13H-16H','B105','2024-01-10','2024-04-20',10);
 
 
--- 11- Insertion dans la table Inscription x 10
-
--- 12- Insertion dans la table Professeur x 10
-
-/*
-DECLARE @sql_Prof NVARCHAR(MAX) = '';
-
-SELECT @sql_Prof += 
-'ALTER TABLE Professeur DROP CONSTRAINT ' + name + ';'
-FROM sys.check_constraints
-WHERE parent_object_id = OBJECT_ID('Professeur');
-
-
-
-EXEC(@sql_Prof);
-
-*/
+-- 10) Insertion dans la table Semestre x 10
+INSERT INTO Semestre(nom_Semest, annee_Semest, datDeb_Semest, dateFin_Semest)
+VALUES
+	('Hiver','2024','2024-01-10','2024-04-20'),
+	('Été','2024','2024-05-10','2024-08-20'),
+	('Automne','2024','2024-09-01','2024-12-20'),
+	('Hiver','2025','2025-01-10','2025-04-20'),
+	('Été','2025','2025-05-10','2025-08-20'),
+	('Automne','2025','2025-09-01','2025-12-20'),
+	('Hiver','2026','2026-01-10','2026-04-20'),
+	('Été','2026','2026-05-10','2026-08-20'),
+	('Automne','2026','2026-09-01','2026-12-20'),
+	('Hiver','2027','2027-01-10','2027-04-20');
 
 
---INSERT INTO Professeur(id_User, id_User)
---VALUES
---	(100, 100);
+-- 11) Insertion dans la table SessionExamen x 10
+INSERT INTO SessionExamen (type_SessExam, dateDeb, dateFin, id_Semest)
+VALUES
+	('Intra', '2024-02-15', '2024-02-20', 1),
+	('Final', '2024-04-10', '2024-04-20', 1),
+	('Intra', '2024-06-15', '2024-06-20', 2),
+	('Final', '2024-08-10', '2024-08-20', 2),
+	('Intra', '2024-10-15', '2024-10-20', 3),
+	('Final', '2024-12-10', '2024-12-20', 3),
+	('Intra', '2025-02-15', '2025-02-20', 4),
+	('Final', '2025-04-10', '2025-04-20', 4),
+	('Intra', '2025-06-15', '2025-06-20', 5),
+	('Final', '2025-08-10', '2025-08-20', 5);
 
--- 13- Insertion dans la table Enseigner x 10
 
--- 14- Insertion dans la table SessionExamen x 10
+-- 12) Insertion dans la table Evaluation x 10
+INSERT INTO Evaluation (type_Eval, date_Eval, nom_Eval, poids_Eval, descript_Eval, id_CoursOf, id_SessExam)
+VALUES
+	('Intra',               '2024-02-16', 'Intra Programmation',        30.00, 'Examen intra du cours Programmation',      1, 1),
+	('Examen final',        '2024-04-15', 'Final Structures données',   40.00, 'Examen final du cours Structures données', 2, 2),
+	('Travaux Pratiques 1', '2024-06-16', 'TP Bases données',           20.00, 'Travail pratique sur SQL',                3, 3),
+	('Examen final',        '2024-08-15', 'Final Réseaux',              40.00, 'Évaluation finale en laboratoire',       4, 4),
+	('Quiz',                '2024-10-16', 'Quiz Systèmes',              15.00, 'Quiz sur les systèmes d’exploitation',   5, 5),
+	('Examen final',        '2024-12-15', 'Final IA',                   35.00, 'Examen final du cours IA',               6, 6),
+	('Travaux Pratiques 1', '2025-02-16', 'TP Web',                     25.00, 'Projet pratique développement Web',      7, 7),
+	('Travaux Pratiques 1', '2025-04-15', 'TP Mobile',                  25.00, 'Projet pratique mobile',                 8, 8),
+	('Intra',               '2025-06-16', 'Intra Cybersécurité',        30.00, 'Examen intra cybersécurité',             9, 9),
+	('Examen final',        '2025-08-15', 'Final Cloud',                40.00, 'Examen final cloud computing',           10, 10);
 
--- 15- Insertion dans la table Evaluation x 10
 
--- 16- Insertion dans la table Note x 10
+-- 13) Insertion dans la table Professeur x 8
+INSERT INTO Professeur (id_User, grade_Prof, statut_Prof)
+VALUES
+	(1003, 'Chargé de cours',      'Permanent'),
+	(1103, 'Professeur agrégé',    'temps plein'),
+	(1203, 'Maître de conférence', 'Permanent'),
+	(1303, 'Chargé de cours',      'contractuel'),
+	(1403, 'Professeur titulaire', 'Permanent'),
+	(1503, 'Auxilliaire de cours', 'temps partiel'),
+	(1603, 'Professeur agrégé',    'Invité'),
+	(1703, 'Chargé de cours',      'temps plein');
+
+
+-- 14) Insertion dans la table ChoixSpecialisation x 10
+INSERT INTO ChoixSpecialisation (date_ChoixSpec, nb_ChoixSpec, id_Etud, id_Spec)
+VALUES
+	('2024-01-15', 1, 3,   10),
+	('2024-01-16', 1, 103, 11),
+	('2024-01-17', 1, 203, 12),
+	('2024-01-18', 1, 303, 13),
+	('2024-01-19', 1, 403, 14),
+	('2024-01-20', 1, 503, 15),
+	('2024-01-21', 1, 603, 16),
+	('2024-01-22', 1, 703, 17),
+	('2024-01-23', 1, 803, 18),
+	('2024-01-24', 1, 903, 19);
+
+
+-- 15) Insertion dans la table Inscription x 10
+INSERT INTO Inscription (
+	statut_Inscript,
+	date_Inscript,
+	date_Desinscript,
+	noteFi_Inscript,
+	noteLet_Inscript,
+	decisionFi_Inscript,
+	tentative_Inscript,
+	estValidePrerequis_Inscript,
+	id_Etud,
+	id_CoursOf
+)
+VALUES
+	('Inscrit', '2024-01-08', NULL, 85.50, 'A', 'Réussi', 1, 1, 3,   1),
+	('Inscrit', '2024-01-08', NULL, 78.00, 'B', 'Réussi', 1, 1, 103, 2),
+	('Inscrit', '2024-01-08', NULL, 88.00, 'A', 'Réussi', 1, 1, 203, 3),
+	('Inscrit', '2024-01-08', NULL, 69.50, 'C', 'Réussi', 1, 1, 303, 4),
+	('Inscrit', '2024-01-08', NULL, 74.00, 'B', 'Réussi', 1, 1, 403, 5),
+	('Inscrit', '2024-01-08', NULL, 91.00, 'A', 'Réussi', 1, 1, 503, 6),
+	('Inscrit', '2024-01-08', NULL, 80.00, 'B', 'Réussi', 1, 1, 603, 7),
+	('Inscrit', '2024-01-08', NULL, 77.00, 'B', 'Réussi', 1, 1, 703, 8),
+	('Inscrit', '2024-01-08', NULL, 66.00, 'C', 'Réussi', 1, 1, 803, 9),
+	('Inscrit', '2024-01-08', NULL, 59.00, 'D', 'Échec',  1, 1, 903, 10);
+
+
+-- 16) Insertion dans la table Note x 10
+INSERT INTO Note (valNum_Note, ValLettre_Note, retroAction, dateAttrib_Note, id_Inscript, id_Eval)
+VALUES
+	(85.50, 'A', 'Très bon travail',                  '2024-02-20', 10, 1),
+	(78.00, 'B', 'Bonne maîtrise générale',           '2024-04-18', 11, 2),
+	(88.00, 'A', 'Excellent en SQL',                  '2024-06-20', 12, 3),
+	(69.50, 'C', 'Doit améliorer la partie pratique', '2024-08-18', 13, 4),
+	(74.00, 'B', 'Résultat satisfaisant',             '2024-10-18', 14, 5),
+	(91.00, 'A', 'Excellent rendement',               '2024-12-18', 15, 6),
+	(80.00, 'B', 'Bon projet Web',                    '2025-02-20', 16, 7),
+	(77.00, 'B', 'Application mobile correcte',       '2025-04-18', 17, 8),
+	(66.00, 'C', 'Besoin de renforcer la sécurité',   '2025-06-20', 18, 9),
+	(59.00, 'D', 'Échec, reprise recommandée',        '2025-08-18', 19, 10);
+
+
+-- 17) Insertion dans la table Restreindre x 10
+INSERT INTO Restreindre(nb_Restrict, id_Spec, id_Cours)
+VALUES
+	(2,@id_Spec,6),(3,@id_Spec,4),(1,@id_Spec,10),(2,@id_Spec,5),(1,@id_Spec,3),
+	(2,@id_Spec,7),(1,@id_Spec,8),(3,@id_Spec,1),(2,@id_Spec,5),(1,@id_Spec,9);
+
+
+-- 18) Insertion dans la table Enseigner x 10
+INSERT INTO Enseigner (nbH_Enseigner, datDeb_Enseigner, dateFin_Enseigner, id_Prof, id_CoursOf)
+VALUES
+	(45, '2024-01-10', '2024-04-20', 1003, 1),
+	(45, '2024-01-10', '2024-04-20', 1103, 2),
+	(45, '2024-01-10', '2024-04-20', 1203, 3),
+	(60, '2024-01-10', '2024-04-20', 1303, 4),
+	(45, '2024-01-10', '2024-04-20', 1403, 5),
+	(45, '2024-01-10', '2024-04-20', 1503, 6),
+	(60, '2024-01-10', '2024-04-20', 1603, 7),
+	(60, '2024-01-10', '2024-04-20', 1703, 8),
+	(45, '2024-01-10', '2024-04-20', 1003, 9),
+	(45, '2024-01-10', '2024-04-20', 1103, 10);
