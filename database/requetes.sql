@@ -179,3 +179,67 @@ GROUP BY Sem.nom_Semest, Sem.annee_Semest, SE.type_SessExam, SE.dateDeb,
          C.code_Cours, C.nom_Cours, Ev.nom_Eval, Ev.type_Eval,
          P.nom_Prof, P.prenom_Prof
 ORDER BY Sem.annee_Semest, SE.dateDeb, C.code_Cours;
+
+
+/*
+-----------############################# Requêtes utilisant les vues, les procédures stockées, les fonctions, les triggers, les curseurs etc.. ###########
+
+1- Ajouter une vue permettant d'afficher le relevé de notes d'un étudiant
+2- Écrire une procédure stockées permettant d'inscrire un étudiant
+3- Écrire une procédure ou fonction stockée permettant de calculer la moyenne d'un étudiant
+4- Écrire une procédure stockée permettant de générer un relevé de notes
+5- Écrire une procédure stockée permettant de valider les prerequis
+6- Écrire un triggers permettant d'effectuer le recalcul GPA
+7- Écrire un triggers permettant d'empêcher une suppression critique
+8- Écrire un triggers permettant de vérifier la somme poids d'évaluation
+9- Créer une vue affichant la moyenne de note final par étudiant
+10-Écrire une fonction stockée affichant les étudiants ayant une moyenne supérieure à une certaine note
+
+
+---- ####################### Requêtes de consultation de base simples (SELECT simples)
+
+1- Listes tous les programmes, les étudiants, les utlisateurs, les enseignants, les administrateurs, les cours, les spécialisations
+	un type de cours, étudiants en échec, etc.
+
+----- ##################### Reequêtes de Join essentielles ############################
+1- Lister les étudiants d'un programme
+2- Donner les spécialisation par programme
+3- Les cours  enseignés par un professeur
+4- les étudiants inscrits à un cours
+
+----- ##################### Requêtes d'agrégation (COUNT, AVG, SUM, MAX) utilisant les clause GROUP BY, ORDER BY #####################
+1- Compter les nombre d'étudiants, le nombre de cours, le nombre d'étudiants par programme
+2- Calculer la moyenne générale par étudiant
+3- Calculer la moyenne générale d'étudiant par cours
+4- Donner le meilleur étudiant par cours
+5- Donner l'étudiant ayant la meilleur moyenne générale
+
+----- ############## Sous-requêtes  ###########################
+1- Aficher les cours sans inscriptions
+2- Afficher les professeurs sans cours
+
+---- ################################ Requêtes complexes ###################################
+1- Taux de réussite d'un cours
+2- Calculer la charge d'enseignement par professeur
+3- Nombre d'étudiants par cours offerts
+4- Cours dépassant sa capacité
+5- Moyenne d'un évaluation
+6- Cours les plus populaires
+7- Requêtes permettant d'afficher les cours les plus difficiles
+8- Requêtes permettant d'afficher le taux d'abandon
+9- Requête permettant d'afficher le nombre d'évaluation par session
+10-Requête affichant les étudiants sans notes finales
+11-Requêtes affichant les étudiant ayant repris un cours
+12- Requêtes affichant le nombre d'inscription par semestre
+
+----- ################ Requêtes de mise à jour (UPDATE) et de suppression (DELETE) #######
+1- Effectuer la mise à jour du statut d"un étudiant
+2- Effectuer la mise à jour sur la décision finale de réussite ou d'échec d'un édutiant
+4- Supprimer les champs de note NULL
+
+*/
+
+
+/*
+	Ajout des rôles de sécurité (à faire)
+*/
