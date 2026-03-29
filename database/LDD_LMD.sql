@@ -282,7 +282,8 @@ CREATE TABLE CoursPrerequis (
 	id_Prerequis INT NOT NULL,
 	CONSTRAINT PK_CoursPrerequis PRIMARY KEY (id_CoursPre),
 	CONSTRAINT FK_CoursPrerequis_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours),
-	CONSTRAINT FK_CoursPrerequis_Prerequis FOREIGN KEY(id_Prerequis) REFERENCES Cours(id_Cours)
+	CONSTRAINT FK_CoursPrerequis_Prerequis FOREIGN KEY(id_Prerequis) REFERENCES Cours(id_Cours),
+	CONSTRAINT CK_CoursPrerequis_id_Cours_Prerequis CHECK(id_Cours <> id_Prerequis) -- Vérifie qu'un cours ne soit son propre prerequis
 )
 
 -- 7- Création de la table CoursOffert
@@ -388,7 +389,8 @@ CREATE TABLE Inscription (
 	id_CoursOf INT NOT NULL,
 	CONSTRAINT PK_Inscription PRIMARY KEY(id_Inscript),
 	CONSTRAINT FK_Inscription_Etudiant FOREIGN KEY(id_Etud) REFERENCES Etudiant(id_User),
-	CONSTRAINT FK_Inscription_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf)
+	CONSTRAINT FK_Inscription_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
+	CONSTRAINT UQ_Inscription_id_Etud_id_CoursOf UNIQUE(id_Etud, id_CoursOf) -- Évite une double inscription au même cours offert
 )
 -- 14 -) Création de la table Note
 
@@ -441,6 +443,46 @@ https://www.sqlservertutorial.net/sql-server-basics/sql-server-computed-columns/
 2- Comment utiliser les pattern matching avec LIKE ET ESCAPE 
 https://learn.microsoft.com/en-us/sql/t-sql/language-elements/like-transact-sql?view=sql-server-ver17
 https://www.sqlservertutorial.net/sql-server-basics/sql-server-like/
+
+3- Création d'index
+https://learn.microsoft.com/fr-fr/sql/t-sql/statements/create-index-transact-sql?view=sql-server-ver17
+
+
+Création des index après sur :
+
+	CREATE INDEX IX_CoursProgramme_Cours
+	ON CoursProgramme(id_Cours);
+
+	CREATE INDEX IX_Inscription_Etudiant
+	ON Inscription(id_Etud);
+
+	CREATE INDEX IX_Inscription_CoursOffert
+	ON Inscription(id_CoursOf);
+
+	CREATE INDEX IX_Note_Inscription
+	ON Note(id_Inscript);
+
+	CREATE INDEX IX_Note_Evaluation
+	ON Note(id_Eval);
+
+	CREATE INDEX IX_Evaluation_CoursOffert
+	ON Evaluation(id_CoursOf);
+
+	CREATE INDEX IX_Evaluation_SessionExamen
+	ON Evaluation(id_SessExam);
+
+	CREATE INDEX IX_Utilisateur_NomPrenom
+	ON Utilisateur(nom_User, prenom_User);
+
+	CREATE INDEX IX_Cours_Code
+	ON Cours(code_Cours);
+
+	CREATE INDEX IX_Inscription_Date
+	ON Inscription(date_Inscript);
+
+	CREATE INDEX IX_Inscription_EtudCours
+	ON Inscription(id_Etud, id_CoursOf);
+
 */
 
 
