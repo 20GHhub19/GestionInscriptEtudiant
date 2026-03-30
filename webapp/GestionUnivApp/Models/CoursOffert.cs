@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Query;
+
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace GestionUnivApp.Models
 {
@@ -18,4 +19,5 @@ namespace GestionUnivApp.Models
         public ICollection<Evaluation> Evaluations { get; set; } = new List<Evaluation>();
         public ICollection<Enseigner> Enseignements { get; set; } = new List<Enseigner>();
     }
+
 }
