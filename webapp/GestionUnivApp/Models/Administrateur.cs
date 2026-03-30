@@ -2,7 +2,7 @@
 {
     public class Administrateur : Utilisateur
     {
-        public string Role_Admin_Etud { get; set; } = null;
+        public string Role_Admin_Etud { get; set; } = null!;
 
     }
 }
