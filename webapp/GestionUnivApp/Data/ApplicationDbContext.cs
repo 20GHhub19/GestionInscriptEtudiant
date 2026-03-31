@@ -61,12 +61,14 @@ namespace GestionUnivApp.Data
 
             modelBuilder.Entity<Cours>()
                 .HasKey(c => c.Id_Cours);
+
             modelBuilder.Entity<Cours>()
                 .HasIndex(c => c.Code_Cours)
                 .IsUnique();
 
             modelBuilder.Entity<Semestre>()
                 .HasKey(s => s.Id_Semest);
+
             modelBuilder.Entity<Semestre>()
                 .HasIndex(s => new { s.Nom_Semest, s.Annee_Semest })
                 .IsUnique();
@@ -140,10 +142,8 @@ namespace GestionUnivApp.Data
                 .HasForeignKey(co => co.Id_Cours);
 
             // --- Session examen ---
-
             modelBuilder.Entity<SessionExamen>()
                .HasKey(se => se.Id_SessExam);
-
 
             modelBuilder.Entity<SessionExamen>()
                 .HasOne(se => se.Semestre)
