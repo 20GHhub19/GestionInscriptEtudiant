@@ -9,7 +9,7 @@
         public string Type_Cours { get; set; } =  null!;
         public int? NbHeure_Cours { get; set; }
         public ICollection<CoursProgramme> CoursProgrammes { get; set; } = new List<CoursProgramme>();
-        public ICollection<Restreindre> Restrictionss { get; set; } = new List<Restreindre>();
+        public ICollection<Restreindre> Restrictions { get; set; } = new List<Restreindre>();
         public ICollection<CoursPrerequis> Prerequis { get; set; } = new List<CoursPrerequis>();
         public ICollection<CoursPrerequis> EstPrerequisDe { get; set; } = new List<CoursPrerequis>();
         public ICollection<CoursOffert> CoursOfferts { get; set; } = new List<CoursOffert>();
