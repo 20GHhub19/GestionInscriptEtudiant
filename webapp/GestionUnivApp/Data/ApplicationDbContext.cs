@@ -60,9 +60,13 @@ namespace GestionUnivApp.Data
                 .IsUnique();
 
             modelBuilder.Entity<Cours>()
+                .HasKey(c => c.Id_Cours);
+            modelBuilder.Entity<Cours>()
                 .HasIndex(c => c.Code_Cours)
                 .IsUnique();
 
+            modelBuilder.Entity<Semestre>()
+                .HasKey(s => s.Id_Semest);
             modelBuilder.Entity<Semestre>()
                 .HasIndex(s => new { s.Nom_Semest, s.Annee_Semest })
                 .IsUnique();
@@ -85,6 +89,9 @@ namespace GestionUnivApp.Data
 
             // --- Relations principales ---
             modelBuilder.Entity<Specialisation>()
+               .HasKey(s => s.Id_Spec);
+
+            modelBuilder.Entity<Specialisation>()
                 .HasOne(s => s.Programme)
                 .WithMany(p => p.Specialisations)
                 .HasForeignKey(s => s.Id_Prog_Spec);
@@ -93,6 +100,9 @@ namespace GestionUnivApp.Data
                 .HasOne(e => e.Programme)
                 .WithMany(p => p.Etudiants)
                 .HasForeignKey(e => e.Programme_Etud);
+
+            modelBuilder.Entity<CoursProgramme>()
+                .HasKey(cp => cp.Id_CoursProg);
 
             modelBuilder.Entity<CoursProgramme>()
                 .HasOne(cp => cp.Programme)
@@ -112,6 +122,9 @@ namespace GestionUnivApp.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<CoursPrerequis>()
+                .HasKey(cp => cp.Id_Prerequis);
+
+            modelBuilder.Entity<CoursPrerequis>()
                 .HasOne(cp => cp.Prerequis)
                 .WithMany(c => c.EstPrerequisDe)
                 .HasForeignKey(cp => cp.Id_Prerequis)
@@ -119,17 +132,28 @@ namespace GestionUnivApp.Data
 
             // --- Cours offert ---
             modelBuilder.Entity<CoursOffert>()
+                .HasKey(co => co.Id_CoursOf);
+
+            modelBuilder.Entity<CoursOffert>()
                 .HasOne(co => co.Cours)
                 .WithMany(c => c.CoursOfferts)
                 .HasForeignKey(co => co.Id_Cours);
 
             // --- Session examen ---
+
+            modelBuilder.Entity<SessionExamen>()
+               .HasKey(se => se.Id_SessExam);
+
+
             modelBuilder.Entity<SessionExamen>()
                 .HasOne(se => se.Semestre)
                 .WithMany(s => s.SessionExamens)
                 .HasForeignKey(se => se.Id_Semest);
 
             // --- Evaluation ---
+            modelBuilder.Entity<Evaluation>()
+                .HasKey(e => e.Id_Eval);
+
             modelBuilder.Entity<Evaluation>()
                 .HasOne(e => e.CoursOffert)
                 .WithMany(co => co.Evaluations)
@@ -142,6 +166,9 @@ namespace GestionUnivApp.Data
 
             // --- Choix de spécialisation ---
             modelBuilder.Entity<ChoixSpecialisation>()
+                .HasKey(cs => cs.Id_ChoixSpec);
+
+            modelBuilder.Entity<ChoixSpecialisation>()
                 .HasOne(cs => cs.Etudiant)
                 .WithMany(e => e.ChoixSpecialisations)
                 .HasForeignKey(cs => cs.Id_User);
@@ -152,6 +179,10 @@ namespace GestionUnivApp.Data
                 .HasForeignKey(cs => cs.Id_Spec);
 
             // --- Inscription ---
+            modelBuilder.Entity<Inscription>()
+               .HasKey(i => i.Id_Inscript);
+
+
             modelBuilder.Entity<Inscription>()
                 .HasOne(i => i.Etudiant)
                 .WithMany(e => e.Inscriptions)
@@ -164,6 +195,10 @@ namespace GestionUnivApp.Data
 
             // --- Notes ---
             modelBuilder.Entity<Note>()
+               .HasKey(n => n.Id_Note);
+
+
+            modelBuilder.Entity<Note>()
                 .HasOne(n => n.Inscription)
                 .WithMany(i => i.Notes)
                 .HasForeignKey(n => n.Id_Inscript);
@@ -175,6 +210,9 @@ namespace GestionUnivApp.Data
 
             // --- Restrictions ---
             modelBuilder.Entity<Restreindre>()
+                .HasKey(r => r.Id_Rest);
+
+            modelBuilder.Entity<Restreindre>()
                 .HasOne(r => r.Specialisation)
                 .WithMany(s => s.Restrictions)
                 .HasForeignKey(r => r.Id_Spec);
@@ -185,6 +223,10 @@ namespace GestionUnivApp.Data
                 .HasForeignKey(r => r.Id_Cours);
 
             // --- Enseignements ---
+            modelBuilder.Entity<Enseigner>()
+                .HasKey(e => e.Id_Enseigner);
+
+
             modelBuilder.Entity<Enseigner>()
                 .HasOne(e => e.Professeur)
                 .WithMany(p => p.Enseignements)
