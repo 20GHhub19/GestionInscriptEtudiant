@@ -1,0 +1,72 @@
+﻿@page
+@model GestionUnivApp.Areas.Identity.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Créer un compte";
+}
+
+<h2>Créer un compte</h2>
+
+<form method="post">
+    <div class="form-group mb-3">
+        <label asp-for="Input.Email" class="form-label"></label>
+        <input asp-for="Input.Email" class="form-control" />
+        <span asp-validation-for="Input.Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.Password" class="form-label"></label>
+        <input asp-for="Input.Password" type="password" class="form-control" />
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+    </div>
+
+    <hr />
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.NomUser" class="form-label"></label>
+        <input asp-for="Input.NomUser" class="form-control" />
+        <span asp-validation-for="Input.NomUser" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.PrenomUser" class="form-label"></label>
+        <input asp-for="Input.PrenomUser" class="form-control" />
+        <span asp-validation-for="Input.PrenomUser" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.DateNaisUser" class="form-label"></label>
+        <input asp-for="Input.DateNaisUser" type="date" class="form-control" />
+        <span asp-validation-for="Input.DateNaisUser" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.AdresseUser" class="form-label"></label>
+        <input asp-for="Input.AdresseUser" class="form-control" />
+        <span asp-validation-for="Input.AdresseUser" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.NumTelUser" class="form-label"></label>
+        <input asp-for="Input.NumTelUser" class="form-control" />
+        <span asp-validation-for="Input.NumTelUser" class="text-danger"></span>
+    </div>
+
+    <hr />
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.Role" class="form-label">Rôle</label>
+        <select asp-for="Input.Role" class="form-select">
+            <option value="Etudiant">Étudiant</option>
+            <option value="Professeur">Professeur</option>
+            <option value="Administrateur">Administrateur</option>
+        </select>
+        <span asp-validation-for="Input.Role" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Créer le compte</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

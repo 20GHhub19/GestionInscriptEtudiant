@@ -218,20 +218,23 @@ CREATE TABLE Specialisation (
 )
 CREATE TABLE Utilisateur (
 	id_User INT  IDENTITY (100, 1),
-	nom_User VARCHAR(15) NOT NULL,
-	prenom_User VARCHAR(20) NOT NULL,
+	nom_User VARCHAR(50) NOT NULL,
+	prenom_User VARCHAR(50) NOT NULL,
 	dateInscriptUser DATE NOT NULL DEFAULT GETDATE(),
 	mat_User AS (CAST(YEAR(dateInscriptUser) AS VARCHAR(4)) +
 	RIGHT('00' + CAST(MONTH(dateInscriptUser) AS VARCHAR(2)), 2) +
 	RIGHT('0000' + CAST(id_User AS VARCHAR(4)), 4)) PERSISTED UNIQUE,
 	dateNais_User Date NOT NULL,
-	numTel_User VARCHAR(15),
+	numTel_User VARCHAR(20),
 	CHECK(numTel_User IS NULL OR numTel_User LIKE '[1-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
-	courriel_User VARCHAR(30),
-	CHECK(courriel_User LIKE '%_@_%._%'), 
-	adresse_User  VARCHAR(80),
-	CONSTRAINT PK_Utilisateur PRIMARY KEY(id_User)
+	courriel_User VARCHAR(100),
+	CHECK(courriel_User LIKE '%_@_%._%'),
+	passwordHash_User VARCHAR(MAX),
+	adresse_User  VARCHAR(200),
+	CONSTRAINT PK_Utilisateur PRIMARY KEY(id_User),
+	CONSTRAINT UQ_Utilisateur_nom_User_prenom_User_courriel_User UNIQUE(nom_User, prenom_User, courriel_User)
 )
+
 
 CREATE TABLE Administrateur (
 	id_User INT NOT NULL,
@@ -243,8 +246,8 @@ CREATE TABLE Administrateur (
 -- 3-) Table Etudiant
 CREATE TABLE Etudiant (
 	id_User INT NOT NULL,
-	statut_Etud VARCHAR(30) NOT NULL,
-	programme_Etud INT NOT NULL,
+	statut_Etud  VARCHAR (30) NOT NULL DEFAULT 'Inactif',
+	programme_Etud INT DEFAULT NULL,
 	CONSTRAINT PK_Etudiant PRIMARY KEY (id_User),
 	CONSTRAINT FK_Etudiant_Programme FOREIGN KEY(programme_Etud) REFERENCES Programme(id_Prog),
 	CONSTRAINT FK_Etudiant_Utilisateur FOREIGN KEY(id_User) REFERENCES Utilisateur(id_User)
