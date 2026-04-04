@@ -10,15 +10,9 @@ GO
 
 -- On supprime la base de données juste si elle existe.
 -- Cela évite une erreur si on a jamais exécuté le script.
---DROP DATABASE IF EXISTS GestionInscriptEtudiant;
---IF NOT USE DATABASE 
+DROP DATABASE IF EXISTS GestionInscriptEtudiant;
 
--- Création de la base de données si elle n'existe pas
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'GestionInscriptEtudiant')
-BEGIN
-	-- On crée la base de données Gestion des notes et inscriptions des étudiants
-	CREATE DATABASE GestionInscriptEtudiant;
-END;
+CREATE DATABASE GestionInscriptEtudiant;
 GO
 
 -- On utilise la base de données GestionInscriptEtudiant pour ajouter
@@ -39,35 +33,23 @@ IF EXISTS (
 		DROP CONSTRAINT FK_Specialisation_Programme;
 	END
 
-IF EXISTS (
-	SELECT 1
-	FROM sys.foreign_keys
-	WHERE NAME = 'FK_Etudiant_Programme' OR NAME = 'FK_Etudiant_Utilisateur'
-	)
-	BEGIN
-		ALTER TABLE Etudiant
-		DROP CONSTRAINT FK_Etudiant_Programme, FK_Etudiant_Utilisateur
-	END
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Etudiant_Programme')
+	BEGIN ALTER TABLE Etudiant DROP CONSTRAINT FK_Etudiant_Programme; END
 
-IF EXISTS (
-	SELECT 1
-	FROM sys.foreign_keys
-	WHERE NAME = 'FK_CoursProgramme_Programme' OR name = 'FK_CoursProgramme_Cours'
-	)
-	BEGIN
-		ALTER TABLE CoursProgramme
-		DROP CONSTRAINT FK_CoursProgramme_Programme, FK_CoursProgramme_Cours
-	END
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Etudiant_Utilisateur')
+	BEGIN ALTER TABLE Etudiant DROP CONSTRAINT FK_Etudiant_Utilisateur; END
 
-IF EXISTS (
-	SELECT 1
-	FROM sys.foreign_keys
-	WHERE NAME = 'FK_CoursPrerequis_Cours' OR NAME = 'FK_CoursPrerequis_Prerequis'
-	)
-	BEGIN
-		ALTER TABLE CoursPrerequis
-		DROP CONSTRAINT FK_CoursPrerequis_Cours, FK_CoursPrerequis_Prerequis;
-	END
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_CoursProgramme_Programme')
+	BEGIN ALTER TABLE CoursProgramme DROP CONSTRAINT FK_CoursProgramme_Programme; END
+
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_CoursProgramme_Cours')
+	BEGIN ALTER TABLE CoursProgramme DROP CONSTRAINT FK_CoursProgramme_Cours; END
+
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_CoursPrerequis_Cours')
+	BEGIN ALTER TABLE CoursPrerequis DROP CONSTRAINT FK_CoursPrerequis_Cours; END
+
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_CoursPrerequis_Prerequis')
+	BEGIN ALTER TABLE CoursPrerequis DROP CONSTRAINT FK_CoursPrerequis_Prerequis; END
 
 IF EXISTS (
 	SELECT 1
@@ -89,66 +71,42 @@ IF EXISTS (
 		DROP CONSTRAINT FK_SessionExamen_Semestre;
 	END
 	
-IF EXISTS (
-	SELECT 1
-	FROM sys.foreign_keys
-	WHERE NAME = 'FK_Evaluation_CoursOffert' OR NAME = 'FK_Evaluation_SessionExamen'
-	)
-	BEGIN
-		ALTER TABLE Evaluation
-		DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_SessionExamen;
-	END
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Evaluation_CoursOffert')
+	BEGIN ALTER TABLE Evaluation DROP CONSTRAINT FK_Evaluation_CoursOffert; END
+
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Evaluation_SessionExamen')
+	BEGIN ALTER TABLE Evaluation DROP CONSTRAINT FK_Evaluation_SessionExamen; END
 	
-IF EXISTS (
-	SELECT 1
-	FROM sys.foreign_keys
-	WHERE NAME = 'FK_ChoixSpecialisation_Etudiant' OR NAME = 'FK_ChoixSpecialisation_Specialisation'
-	)
-	BEGIN
-		ALTER TABLE ChoixSpecialisation
-		DROP CONSTRAINT FK_ChoixSpecialisation_Etudiant, FK_ChoixSpecialisation_Specialisation;
-	END
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_ChoixSpecialisation_Etudiant')
+	BEGIN ALTER TABLE ChoixSpecialisation DROP CONSTRAINT FK_ChoixSpecialisation_Etudiant; END
 
-IF EXISTS (
-	SELECT 1
-	FROM sys.foreign_keys
-	WHERE NAME = 'FK_Inscription_Etudiant' OR NAME = 'FK_Inscription_CoursOffert'
-	)
-	BEGIN
-		ALTER TABLE Inscription
-		DROP CONSTRAINT FK_Inscription_Etudiant, FK_Inscription_CoursOffert;
-	END
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_ChoixSpecialisation_Specialisation')
+	BEGIN ALTER TABLE ChoixSpecialisation DROP CONSTRAINT FK_ChoixSpecialisation_Specialisation; END
 
-IF EXISTS (
-	SELECT 1
-	FROM sys.foreign_keys
-	WHERE NAME = 'FK_Note_Inscription' OR NAME = 'FK_Note_Evaluation'
-	)
-	BEGIN
-		ALTER TABLE Note
-		DROP CONSTRAINT FK_Note_Inscription, FK_Note_Evaluation;
-	END
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Inscription_Etudiant')
+	BEGIN ALTER TABLE Inscription DROP CONSTRAINT FK_Inscription_Etudiant; END
 
-IF EXISTS (
-	SELECT 1
-	FROM sys.foreign_keys
-	WHERE NAME = 'FK_Restreindre_Specialisation' OR NAME = 'FK_Restreindre_Cours'
-	)
-	BEGIN
-		ALTER TABLE Restreindre
-		DROP CONSTRAINT FK_Restreindre_Specialisation, FK_Restreindre_Cours;
-	END
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Inscription_CoursOffert')
+	BEGIN ALTER TABLE Inscription DROP CONSTRAINT FK_Inscription_CoursOffert; END
+
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Note_Inscription')
+	BEGIN ALTER TABLE Note DROP CONSTRAINT FK_Note_Inscription; END
+
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Note_Evaluation')
+	BEGIN ALTER TABLE Note DROP CONSTRAINT FK_Note_Evaluation; END
+
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Restreindre_Specialisation')
+	BEGIN ALTER TABLE Restreindre DROP CONSTRAINT FK_Restreindre_Specialisation; END
+
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Restreindre_Cours')
+	BEGIN ALTER TABLE Restreindre DROP CONSTRAINT FK_Restreindre_Cours; END
 
 
-IF EXISTS (
-	SELECT 1
-	FROM sys.foreign_keys
-	WHERE NAME = 'FK_Enseigner_Professeur'
-	)
-	BEGIN
-		ALTER TABLE Enseigner
-		DROP CONSTRAINT FK_Enseigner_Professeur, FK_Enseigner_CoursOffert;
-	END
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Enseigner_Professeur')
+	BEGIN ALTER TABLE Enseigner DROP CONSTRAINT FK_Enseigner_Professeur; END
+
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE NAME = 'FK_Enseigner_CoursOffert')
+	BEGIN ALTER TABLE Enseigner DROP CONSTRAINT FK_Enseigner_CoursOffert; END
 
 IF EXISTS (
 	SELECT 1
@@ -237,7 +195,7 @@ CREATE TABLE Administrateur (
 	id_User INT NOT NULL,
 	role_Admin_Etud VARCHAR(30) NOT NULL,
 	CONSTRAINT PK_Administarteur PRIMARY KEY (id_User),
-	CONSTRAINT FK_Administrateur_Utilisateur FOREIGN KEY(id_User) REFERENCES Utilisateur(id_User),
+	CONSTRAINT FK_Administrateur_Utilisateur FOREIGN KEY(id_User) REFERENCES Utilisateur(id_User)
 )
 
 -- 3-) Table Etudiant
@@ -286,7 +244,19 @@ CREATE TABLE CoursPrerequis (
 	CONSTRAINT CK_CoursPrerequis_id_Cours_Prerequis CHECK(id_Cours <> id_Prerequis) -- Vérifie qu'un cours ne soit son propre prerequis
 )
 
--- 7- Création de la table CoursOffert
+-- 7-) Création de la table Semestre
+
+CREATE TABLE Semestre (
+	id_Semest INT IDENTITY (1, 1),
+	nom_Semest VARCHAR(20) NOT NULL,
+	annee_Semest VARCHAR(20) NOT NULL,
+	datDeb_Semest DATE NOT NULL,
+	dateFin_Semest DATE,
+	CONSTRAINT UQ_Semestre_nom_annee UNIQUE(nom_Semest, annee_Semest),
+	CONSTRAINT PK_Semestre PRIMARY KEY(id_Semest)
+)
+
+-- 8- Création de la table CoursOffert
 
 CREATE TABLE CoursOffert (
 	id_CoursOf INT IDENTITY(1, 1),
@@ -298,21 +268,11 @@ CREATE TABLE CoursOffert (
 	dateFin_CoursOf DATE,
 	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Présentiel',
 	id_Cours INT NOT NULL,
+	id_Semest INT NOT NULL,
 	CONSTRAINT CK_CoursOf_mondeEns_CoursOf CHECK (mondeEns_CoursOf IN ('Présentiel', 'Asynchrone', 'En ligne', 'Bimodal')),
 	CONSTRAINT PK_CoursOffert PRIMARY KEY(id_CoursOf),
-	CONSTRAINT FK_CoursOffert_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours)
-)
-
--- 8-) Création de la table Semestre
-
-CREATE TABLE Semestre (
-	id_Semest INT IDENTITY (1, 1),
-	nom_Semest VARCHAR(20) NOT NULL,
-	annee_Semest VARCHAR(20) NOT NULL,
-	datDeb_Semest DATE NOT NULL,
-	dateFin_Semest DATE,
-	CONSTRAINT UQ_Semestre_nom_annee UNIQUE(nom_Semest, annee_Semest),
-	CONSTRAINT PK_Semestre PRIMARY KEY(id_Semest)
+	CONSTRAINT FK_CoursOffert_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours),
+	CONSTRAINT FK_CoursOffert_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest)
 )
 
 -- 9) Création de la table SessionExamen
@@ -344,7 +304,7 @@ CREATE TABLE Evaluation (
 	type_Eval IN ('Intra', 'Quiz', 'Examen final')),
 	CONSTRAINT PK_Evaluation PRIMARY KEY(id_Eval),
 	CONSTRAINT FK_Evaluation_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
-	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam),
+	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam)
 )
 
 -- 11-) Création de la table Professeur
@@ -486,6 +446,8 @@ Création des index après sur :
 */
 
 
+GO
+
 --- ####################################### Insertion dans les tables ##############################################
 
 -- 1 Insertion dans la table Programme x 10
@@ -616,18 +578,18 @@ VALUES
 	('Hiver','2027','2027-01-10','2027-04-20');
 
 -- 10- Insertion dans la table CoursOffert x 10
-INSERT INTO CoursOffert(capacite_CoursOf, horaire_CoursOf, salle_CoursOf, dateDeb_CoursOf, dateFin_CoursOf, id_Cours)
+INSERT INTO CoursOffert(capacite_CoursOf, horaire_CoursOf, salle_CoursOf, dateDeb_CoursOf, dateFin_CoursOf, id_Cours, id_Semest)
 VALUES
-	(40,'Lun 09H-12H','A101','2024-01-10','2024-04-20',1),
-	(35,'Mar 09H-12H','A102','2024-01-10','2024-04-20',2),
-	(30,'Mer 09H-12H','A103','2024-01-10','2024-04-20',3),
-	(25,'Jeu 09H-12H','A104','2024-01-10','2024-04-20',4),
-	(40,'Ven 09H-12H','A105','2024-01-10','2024-04-20',5),
-	(30,'Lun 13H-16H','B101','2024-01-10','2024-04-20',6),
-	(30,'Mar 13H-16H','B102','2024-01-10','2024-04-20',7),
-	(25,'Mer 13H-16H','B103','2024-01-10','2024-04-20',8),
-	(30,'Jeu 13H-16H','B104','2024-01-10','2024-04-20',9),
-	(20,'Ven 13H-16H','B105','2024-01-10','2024-04-20',10);
+	(40,'Lun 09H-12H','A101','2024-01-10','2024-04-20',1,1),
+	(35,'Mar 09H-12H','A102','2024-01-10','2024-04-20',2,1),
+	(30,'Mer 09H-12H','A103','2024-01-10','2024-04-20',3,1),
+	(25,'Jeu 09H-12H','A104','2024-01-10','2024-04-20',4,2),
+	(40,'Ven 09H-12H','A105','2024-01-10','2024-04-20',5,2),
+	(30,'Lun 13H-16H','B101','2024-01-10','2024-04-20',6,3),
+	(30,'Mar 13H-16H','B102','2024-01-10','2024-04-20',7,3),
+	(25,'Mer 13H-16H','B103','2024-01-10','2024-04-20',8,4),
+	(30,'Jeu 13H-16H','B104','2024-01-10','2024-04-20',9,4),
+	(20,'Ven 13H-16H','B105','2024-01-10','2024-04-20',10,5);
 
 
 -- 11- Insertion dans la table Inscription x 10
