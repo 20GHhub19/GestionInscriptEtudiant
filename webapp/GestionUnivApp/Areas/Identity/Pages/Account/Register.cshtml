@@ -4,16 +4,31 @@
     ViewData["Title"] = "Créer un compte";
 }
 
-<h2>Créer un compte</h2>
+<h2 class="mb-4">Créer un compte</h2>
 
-<form method="post">
-    <div class="form-group mb-3">
+<!-- Affichage des erreurs SQL ou de validation -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@error.ErrorMessage</div>
+        }
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form method="post" class="border p-4 rounded shadow-sm bg-light">
+
+    <!-- EMAIL -->
+    <div class="mb-3">
         <label asp-for="Input.Email" class="form-label"></label>
         <input asp-for="Input.Email" class="form-control" />
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
+    <!-- PASSWORD -->
+    <div class="mb-3">
         <label asp-for="Input.Password" class="form-label"></label>
         <input asp-for="Input.Password" type="password" class="form-control" />
         <span asp-validation-for="Input.Password" class="text-danger"></span>
@@ -21,31 +36,36 @@
 
     <hr />
 
-    <div class="form-group mb-3">
+    <!-- NOM -->
+    <div class="mb-3">
         <label asp-for="Input.NomUser" class="form-label"></label>
         <input asp-for="Input.NomUser" class="form-control" />
         <span asp-validation-for="Input.NomUser" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
+    <!-- PRENOM -->
+    <div class="mb-3">
         <label asp-for="Input.PrenomUser" class="form-label"></label>
         <input asp-for="Input.PrenomUser" class="form-control" />
         <span asp-validation-for="Input.PrenomUser" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
+    <!-- DATE NAISSANCE -->
+    <div class="mb-3">
         <label asp-for="Input.DateNaisUser" class="form-label"></label>
         <input asp-for="Input.DateNaisUser" type="date" class="form-control" />
         <span asp-validation-for="Input.DateNaisUser" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
+    <!-- ADRESSE -->
+    <div class="mb-3">
         <label asp-for="Input.AdresseUser" class="form-label"></label>
         <input asp-for="Input.AdresseUser" class="form-control" />
         <span asp-validation-for="Input.AdresseUser" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
+    <!-- TELEPHONE -->
+    <div class="mb-3">
         <label asp-for="Input.NumTelUser" class="form-label"></label>
         <input asp-for="Input.NumTelUser" class="form-control" />
         <span asp-validation-for="Input.NumTelUser" class="text-danger"></span>
@@ -53,9 +73,10 @@
 
     <hr />
 
-    <div class="form-group mb-3">
+    <!-- ROLE -->
+    <div class="mb-3">
         <label asp-for="Input.Role" class="form-label">Rôle</label>
-        <select asp-for="Input.Role" class="form-select">
+        <select asp-for="Input.Role" class="form-select" id="role-select">
             <option value="Etudiant">Étudiant</option>
             <option value="Professeur">Professeur</option>
             <option value="Administrateur">Administrateur</option>
@@ -63,10 +84,75 @@
         <span asp-validation-for="Input.Role" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Créer le compte</button>
+    <!-- PROGRAMME (Étudiant) -->
+    <div class="mb-3" id="programme-section">
+        <label asp-for="Input.ProgrammeEtud" class="form-label">Programme</label>
+        <select asp-for="Input.ProgrammeEtud"
+                asp-items="@(new SelectList(Model.Programmes, "IdProg", "NomProg"))"
+                class="form-select">
+            <option value="">-- Choisir un programme --</option>
+        </select>
+        <span asp-validation-for="Input.ProgrammeEtud" class="text-danger"></span>
+    </div>
+
+    <!-- STATUT ETUDIANT -->
+    <div class="mb-3" id="statut-etud-section">
+        <label asp-for="Input.StatutChoisi" class="form-label">Statut étudiant</label>
+        <select asp-for="Input.StatutChoisi"
+                asp-items="@(new SelectList(Model.Input.StatutEtud))"
+                class="form-select">
+        </select>
+    </div>
+
+    <!-- CHAMPS PROFESSEUR -->
+    <div id="professeur-section" class="mb-3">
+        <label class="form-label">Grade du professeur</label>
+        <select asp-for="Input.GradesParDefaut"
+                asp-items="@(new SelectList(Model.Input.GradesProfs))"
+                class="form-select">
+        </select>
+
+        <label class="form-label mt-2">Statut du professeur</label>
+        <select asp-for="Input.statutProfParDefaut"
+                asp-items="@(new SelectList(Model.Input.StatutsProfs))"
+                class="form-select">
+        </select>
+    </div>
+
+    <!-- CHAMPS ADMIN -->
+    <div id="admin-section" class="mb-3">
+        <label class="form-label">Rôle administratif</label>
+        <select asp-for="Input.RoleAdminDefaut"
+                asp-items="@(new SelectList(Model.Input.RoleAdmin))"
+                class="form-select">
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Créer le compte</button>
 </form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function updateSections() {
+            const role = document.getElementById("role-select").value;
+
+            document.getElementById("programme-section").style.display =
+                role === "Etudiant" ? "block" : "none";
+
+            document.getElementById("statut-etud-section").style.display =
+                role === "Etudiant" ? "block" : "none";
+
+            document.getElementById("professeur-section").style.display =
+                role === "Professeur" ? "block" : "none";
+
+            document.getElementById("admin-section").style.display =
+                role === "Administrateur" ? "block" : "none";
+        }
+
+        document.getElementById("role-select").addEventListener("change", updateSections);
+        window.onload = updateSections;
+    </script>
 }
 

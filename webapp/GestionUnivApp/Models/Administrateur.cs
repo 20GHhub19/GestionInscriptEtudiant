@@ -14,7 +14,7 @@ public partial class Administrateur
     public int IdUser { get; set; }
 
     [Column("role_Admin_Etud")]
-    [StringLength(30)]
+    [StringLength(100)]
     [Unicode(false)]
     public string RoleAdminEtud { get; set; } = null!;
 

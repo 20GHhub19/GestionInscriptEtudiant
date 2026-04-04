@@ -14,7 +14,7 @@ public partial class Etudiant
     public int IdUser { get; set; }
 
     [Column("statut_Etud")]
-    [StringLength(30)]
+    [StringLength(80)]
     [Unicode(false)]
     public required string StatutEtud { get; set; }
 

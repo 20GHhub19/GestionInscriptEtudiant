@@ -232,13 +232,13 @@ CREATE TABLE Utilisateur (
 	passwordHash_User VARCHAR(MAX),
 	adresse_User  VARCHAR(200),
 	CONSTRAINT PK_Utilisateur PRIMARY KEY(id_User),
-	CONSTRAINT UQ_Utilisateur_nom_User_prenom_User_courriel_User UNIQUE(nom_User, prenom_User, courriel_User)
+	CONSTRAINT UQ_Utilisateur_courriel_User UNIQUE(courriel_User)
 )
 
 
 CREATE TABLE Administrateur (
 	id_User INT NOT NULL,
-	role_Admin_Etud VARCHAR(30) NOT NULL,
+	role_Admin_Etud VARCHAR(100) NOT NULL,
 	CONSTRAINT PK_Administarteur PRIMARY KEY (id_User),
 	CONSTRAINT FK_Administrateur_Utilisateur FOREIGN KEY(id_User) REFERENCES Utilisateur(id_User),
 )
@@ -246,7 +246,7 @@ CREATE TABLE Administrateur (
 -- 3-) Table Etudiant
 CREATE TABLE Etudiant (
 	id_User INT NOT NULL,
-	statut_Etud  VARCHAR (30) NOT NULL DEFAULT 'Inactif',
+	statut_Etud  VARCHAR (80) NOT NULL DEFAULT 'Inactif',
 	programme_Etud INT DEFAULT NULL,
 	CONSTRAINT PK_Etudiant PRIMARY KEY (id_User),
 	CONSTRAINT FK_Etudiant_Programme FOREIGN KEY(programme_Etud) REFERENCES Programme(id_Prog),
