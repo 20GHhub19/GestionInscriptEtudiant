@@ -531,30 +531,29 @@ VALUES
 
 
 
-INSERT INTO Utilisateur(nom_User, prenom_User, dateNais_User, numTel_User, courriel_User, adresse_User ) 
-VALUES 
-	('Dupont','Jean','2004-05-12','5141234567','jean.dupont@yahoo.com','Montréal'),
-	('Heumen','Gaius','1999-08-08','5811234567','gaius@gmail.com','Montréal'),
-	('Martin','Paul','2003-01-10','4381112222','paul.martin@gmail.com','Laval'),
-	('Nguyen','Lan','2002-07-21','5143334444','lan.nguyen@gmail.com','Montréal'),
-	('Roy','Sophie','2001-12-30','4505556666','sophie.roy@gmail.com','Longueuil'),
-	('Smith','John','2000-03-15','8197778888','john.smith@gmail.com','Gatineau'),
-	('Diallo','Aminata','2004-09-09','5149990000','aminata@gmail.com','Montréal'),
-	('Chen','Li','2003-11-11','4382223333','li.chen@gmail.com','Montréal'),
-	('Garcia','Luis','2002-06-06','4504445555','luis@gmail.com','Brossard'),
-	('Tremblay','Marc','2001-02-02','4186667777','marc@gmail.com','Québec'),
-	('Durand','Pierre','1975-05-05','5141111111','p.durand@gmail.com','Montréal'),
-	('Lefevre','Claire','1980-02-02','5142222222','c.lefevre@gmail.com','Montréal'),
-	('Smith','Robert','1970-03-03','8193333333','r.smith@gmail.com','Gatineau'),
-	('Khan','Ali','1985-04-04','4504444444','ali.khan@gmail.com','Laval'),
-	('Dubois','Marie','1978-06-06','4185555555','m.dubois@gmail.com','Québec'),
-	('Nguyen','Minh','1982-07-07','5146666666','minh@gmail.com','Montréal'),
-	('Roy','Luc','1969-08-08','5147777777','luc.roy@gmail.com','Montréal'),
-	('Garcia','Ana','1983-09-09','4388888888','ana@gmail.com','Montréal'),
-	('Chen','Wei','1977-10-10','5149999999','wei@gmail.com','Montréal'),
-	('Diallo','Moussa','1981-11-11','5140000000','moussa@gmail.com','Montréal');
-
-
+INSERT INTO Utilisateur(nom_User, prenom_User, dateNais_User, numTel_User, courriel_User, adresse_User, passwordHash_User)
+VALUES
+	('Dupont','Jean','2004-05-12','5141234567','jean.dupont@yahoo.com','Montréal', NULL),
+	('Heumen','Gaius','1999-08-08','5811234567','gaius@gmail.com','Montréal', NULL),
+	('Martin','Paul','2003-01-10','4381112222','paul.martin@gmail.com','Laval', NULL),
+	('Nguyen','Lan','2002-07-21','5143334444','lan.nguyen@gmail.com','Montréal', NULL),
+	('Roy','Sophie','2001-12-30','4505556666','sophie.roy@gmail.com','Longueuil', NULL),
+	('Smith','John','2000-03-15','8197778888','john.smith@gmail.com','Gatineau', NULL),
+	('Diallo','Aminata','2004-09-09','5149990000','aminata@gmail.com','Montréal', NULL),
+	('Chen','Li','2003-11-11','4382223333','li.chen@gmail.com','Montréal', NULL),
+	('Garcia','Luis','2002-06-06','4504445555','luis@gmail.com','Brossard', NULL),
+	('Tremblay','Marc','2001-02-02','4186667777','marc@gmail.com','Québec', NULL),
+	('Durand','Pierre','1975-05-05','5141111111','p.durand@gmail.com','Montréal', NULL),
+	('Lefevre','Claire','1980-02-02','5142222222','c.lefevre@gmail.com','Montréal', NULL),
+	('Smith','Robert','1970-03-03','8193333333','r.smith@gmail.com','Gatineau', NULL),
+	('Khan','Ali','1985-04-04','4504444444','ali.khan@gmail.com','Laval', NULL),
+	('Dubois','Marie','1978-06-06','4185555555','m.dubois@gmail.com','Québec', NULL),
+	('Nguyen','Minh','1982-07-07','5146666666','minh@gmail.com','Montréal', NULL),
+	('Roy','Luc','1969-08-08','5147777777','luc.roy@gmail.com','Montréal', NULL),
+	('Garcia','Ana','1983-09-09','4388888888','ana@gmail.com','Montréal', NULL),
+	('Chen','Wei','1977-10-10','5149999999','wei@gmail.com','Montréal', NULL),
+	('Diallo','Moussa','1981-11-11','5140000000','moussa@gmail.com','Montréal', NULL),
+	('Baida','Imad','2000-01-01','5140000001','imadbaida+admin@gmail.com','Montréal', '$2a$11$umjIYDnLW4QafMegDFjrvu1AreuUb6V3UDCKwT/j7t61oCx1dqtzW');
 
 INSERT INTO Etudiant
 (id_User, statut_Etud, programme_Etud)
@@ -568,7 +567,8 @@ INSERT INTO Administrateur
 	(id_User, role_Admin_Etud)
 VALUES
 	(104, 'Gestionnaire du site'),
-	(108, 'Administrateur d''applications');
+	(108, 'Administrateur d''applications'),
+	(120, 'Administrateur');
 -- 4- Insertion dans la table ChoixSpecialisation x 16
 INSERT INTO ChoixSpecialisation
 	(date_ChoixSpec, nb_ChoixSpec, id_Etud, id_Spec)

@@ -1,0 +1,37 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd '/Users/imadbaida/dev/codecast/server' && uv run hook.py 'l8bls6' 'localhost:4001' 'imadbaida' '123' # __codecast__"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd '/Users/imadbaida/dev/codecast/server' && uv run hook.py 'l8bls6' 'localhost:4001' 'imadbaida' '123' # __codecast__"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd '/Users/imadbaida/dev/codecast/server' && uv run hook.py 'l8bls6' 'localhost:4001' 'imadbaida' '123' # __codecast__"
+          }
+        ]
+      }
+    ]
+  }
+}
