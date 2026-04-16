@@ -564,7 +564,7 @@ INSERT INTO Administrateur
 	(id_User, role_Admin_Etud)
 VALUES
 	(104, 'Gestionnaire du site'),
-	(108, 'Administrateur d''applications')
+	(108, 'Administrateur d''applications');
 -- 4- Insertion dans la table ChoixSpecialisation x 16
 INSERT INTO ChoixSpecialisation
 	(date_ChoixSpec, nb_ChoixSpec, id_Etud, id_Spec)

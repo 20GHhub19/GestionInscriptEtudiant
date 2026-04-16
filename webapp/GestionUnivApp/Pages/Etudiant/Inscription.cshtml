@@ -1,0 +1,97 @@
+@page
+@model GestionUnivApp.Pages.Etudiant.InscriptionModel
+@{
+    ViewData["Title"] = "Inscription aux cours";
+}
+
+<h2 class="mb-2">Inscription aux cours</h2>
+<p class="text-muted mb-4">Programme: <strong>@Model.Programme.NomProg</strong> (@Model.Programme.CodeProg)</p>
+
+<a class="btn btn-outline-secondary mb-3" asp-page="EtudiantDashboard">Retour a mon dossier</a>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!Model.CoursDisponibles.Any())
+{
+    <div class="alert alert-info">Aucun cours disponible pour votre programme.</div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Code</th>
+                            <th>Cours</th>
+                            <th>Semestre</th>
+                            <th>Horaire</th>
+                            <th>Salle</th>
+                            <th>Mode</th>
+                            <th>Professeur</th>
+                            <th>Places</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var co in Model.CoursDisponibles)
+                        {
+                            var cours = co.IdCoursNavigation;
+                            var sem = co.IdSemestNavigation;
+                            var prof = co.Enseigners?.FirstOrDefault()?.IdProfNavigation?.IdUserNavigation;
+                            var nbInscrits = co.Inscriptions?.Count(i => i.StatutInscript == "Inscrit") ?? 0;
+                            var placesRestantes = co.CapaciteCoursOf - nbInscrits;
+                            var dejaInscrit = Model.DejaInscritCoursOfIds.Contains(co.IdCoursOf);
+
+                            <tr>
+                                <td><strong>@cours?.CodeCours</strong></td>
+                                <td>@cours?.NomCours</td>
+                                <td>@sem?.NomSemest @sem?.AnneeSemest</td>
+                                <td>@co.HoraireCoursOf</td>
+                                <td>@(co.SalleCoursOf ?? "—")</td>
+                                <td>@co.MondeEnsCoursOf</td>
+                                <td>@(prof != null ? $"{prof.PrenomUser} {prof.NomUser}" : "—")</td>
+                                <td>
+                                    <span class="badge @(placesRestantes > 5 ? "bg-success" : placesRestantes > 0 ? "bg-warning text-dark" : "bg-danger")">
+                                        @placesRestantes / @co.CapaciteCoursOf
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (dejaInscrit)
+                                    {
+                                        <span class="badge bg-info">Inscrit</span>
+                                    }
+                                    else if (placesRestantes <= 0)
+                                    {
+                                        <span class="badge bg-danger">Complet</span>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-page-handler="Inscrire" class="d-inline">
+                                            <input type="hidden" name="coursOfId" value="@co.IdCoursOf" />
+                                            <button type="submit" class="btn btn-sm btn-primary">S'inscrire</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

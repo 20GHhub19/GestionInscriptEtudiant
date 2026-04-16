@@ -45,6 +45,9 @@ public partial class CoursOffert
     [Column("id_Cours")]
     public int IdCours { get; set; }
 
+    [Column("id_Semest")]
+    public int IdSemest { get; set; }
+
     [InverseProperty("IdCoursOfNavigation")]
     public virtual ICollection<Enseigner> Enseigners { get; set; } = new List<Enseigner>();
 
@@ -54,6 +57,10 @@ public partial class CoursOffert
     [ForeignKey("IdCours")]
     [InverseProperty("CoursOfferts")]
     public virtual Cour IdCoursNavigation { get; set; } = null!;
+
+    [ForeignKey("IdSemest")]
+    [InverseProperty("CoursOfferts")]
+    public virtual Semestre IdSemestNavigation { get; set; } = null!;
 
     [InverseProperty("IdCoursOfNavigation")]
     public virtual ICollection<Inscription> Inscriptions { get; set; } = new List<Inscription>();

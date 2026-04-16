@@ -99,6 +99,10 @@ public partial class ApplicationDbContext : DbContext //: IdentityDbContext<Util
             entity.HasOne(d => d.IdCoursNavigation).WithMany(p => p.CoursOfferts)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CoursOffert_Cours");
+
+            entity.HasOne(d => d.IdSemestNavigation).WithMany(p => p.CoursOfferts)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CoursOffert_Semestre");
         });
 
         modelBuilder.Entity<CoursPrerequi>(entity =>

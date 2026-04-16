@@ -1,7 +1,156 @@
-﻿@page
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "Professeur")]
+@page
 @model GestionUnivApp.Pages.Professeur.ProfDashboardModel
+@{
+    ViewData["Title"] = "Tableau de bord professeur";
+    var lettres = new[] { "A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "E", "F" };
+}
 
-<h2>Tableau de bord Administrateur</h2>
-<p>Bienvenue dans l’espace réservé aux Enseignants.</p>
+<h2 class="mb-4">Tableau de bord professeur</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Info prof -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Mon profil</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><th>Nom</th><td>@Model.Utilisateur.PrenomUser @Model.Utilisateur.NomUser</td></tr>
+                    <tr><th>Matricule</th><td>@Model.Utilisateur.MatUser</td></tr>
+                    <tr><th>Grade</th><td>@Model.Prof.GradeProf</td></tr>
+                    <tr><th>Statut</th><td>@Model.Prof.StatutProf</td></tr>
+                    <tr><th>Courriel</th><td>@Model.Utilisateur.CourrielUser</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h2 class="display-5 fw-bold text-primary">@Model.Enseignements.Count</h2>
+                <p class="text-muted">Cours enseignes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h2 class="display-5 fw-bold text-success">@Model.TotalEtudiants</h2>
+                <p class="text-muted">Etudiants inscrits</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cours enseignes -->
+@foreach (var ens in Model.Enseignements)
+{
+    var coursOf = ens.IdCoursOfNavigation;
+    var cours = coursOf?.IdCoursNavigation;
+    var semestre = coursOf?.IdSemestNavigation;
+    var inscrits = coursOf?.Inscriptions?.ToList() ?? new List<GestionUnivApp.Models.Inscription>();
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">@cours?.CodeCours - @cours?.NomCours</h5>
+            <span class="badge bg-light text-dark">@semestre?.NomSemest @semestre?.AnneeSemest</span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-3"><strong>Horaire:</strong> @coursOf?.HoraireCoursOf</div>
+                <div class="col-md-3"><strong>Salle:</strong> @(coursOf?.SalleCoursOf ?? "—")</div>
+                <div class="col-md-3"><strong>Capacite:</strong> @coursOf?.CapaciteCoursOf</div>
+                <div class="col-md-3"><strong>Heures:</strong> @ens.NbHEnseigner h</div>
+            </div>
+
+            @if (inscrits.Any())
+            {
+                <h6>Etudiants inscrits (@inscrits.Count)</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Matricule</th>
+                                <th>Nom</th>
+                                <th>Statut</th>
+                                <th>Note finale</th>
+                                <th>Lettre</th>
+                                <th>Decision</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var insc in inscrits)
+                            {
+                                var user = insc.IdEtudNavigation?.IdUserNavigation;
+                                <tr>
+                                    <td>@user?.MatUser</td>
+                                    <td>@user?.PrenomUser @user?.NomUser</td>
+                                    <td>
+                                        <span class="badge @(insc.StatutInscript == "Inscrit" ? "bg-success" : "bg-warning text-dark")">
+                                            @insc.StatutInscript
+                                        </span>
+                                    </td>
+                                    <td colspan="4">
+                                        <form method="post" asp-page-handler="SaveNote" class="d-flex align-items-center gap-2">
+                                            <input type="hidden" name="inscriptionId" value="@insc.IdInscript" />
+                                            <input type="number" name="noteFi" value="@insc.NoteFiInscript"
+                                                   step="0.01" min="0" max="100"
+                                                   class="form-control form-control-sm" style="width:80px"
+                                                   placeholder="Note" />
+                                            <select name="noteLet" class="form-select form-select-sm" style="width:75px">
+                                                <option value="">--</option>
+                                                @foreach (var l in lettres)
+                                                {
+                                                    if (insc.NoteLetInscript == l)
+                                                    {
+                                                        <option value="@l" selected>@l</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@l">@l</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <select name="decision" class="form-select form-select-sm" style="width:110px">
+                                                <option value="">--</option>
+                                                @{
+                                                    var decisions = new[] { "Reussi", "Echec", "Abandon" };
+                                                }
+                                                @foreach (var d in decisions)
+                                                {
+                                                    if (insc.DecisionFiInscript == d)
+                                                    {
+                                                        <option value="@d" selected>@d</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@d">@d</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-success">Sauvegarder</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Aucun etudiant inscrit.</p>
+            }
+        </div>
+    </div>
+}

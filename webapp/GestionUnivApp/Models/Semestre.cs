@@ -31,5 +31,8 @@ public partial class Semestre
     public DateOnly? DateFinSemest { get; set; }
 
     [InverseProperty("IdSemestNavigation")]
+    public virtual ICollection<CoursOffert> CoursOfferts { get; set; } = new List<CoursOffert>();
+
+    [InverseProperty("IdSemestNavigation")]
     public virtual ICollection<SessionExaman> SessionExamen { get; set; } = new List<SessionExaman>();
 }

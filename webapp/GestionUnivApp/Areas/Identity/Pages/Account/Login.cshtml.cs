@@ -1,11 +1,10 @@
-﻿using System.Security.Claims;
-using BCrypt.Net;
-using GestionUnivApp.Data;
+using System.Security.Claims;
 using GestionUnivApp.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestionUnivApp.Areas.Identity.Pages.Account
 {
@@ -34,26 +33,29 @@ namespace GestionUnivApp.Areas.Identity.Pages.Account
             if (!ModelState.IsValid)
                 return Page();
 
-            var user = _context.Utilisateurs
-                .FirstOrDefault(u => u.CourrielUser == Input.Email);
+            var utilisateur = await _context.Utilisateurs
+                .FirstOrDefaultAsync(u => u.CourrielUser == Input.Email);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(Input.Password, user.PasswordHashUser))
+            if (utilisateur == null || string.IsNullOrEmpty(utilisateur.PasswordHashUser)
+                                    || !BCrypt.Net.BCrypt.Verify(Input.Password, utilisateur.PasswordHashUser))
             {
                 ModelState.AddModelError(string.Empty, "Courriel ou mot de passe invalide.");
                 return Page();
             }
 
-            string role =
-                user.Administrateur != null ? "Administrateur" :
-                user.Professeur != null ? "Professeur" :
-                "Etudiant";
-
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.IdUser.ToString()),
-                new Claim(ClaimTypes.Email, user.CourrielUser),
-                new Claim(ClaimTypes.Role, role)
+                new(ClaimTypes.NameIdentifier, utilisateur.IdUser.ToString()),
+                new(ClaimTypes.Name, $"{utilisateur.PrenomUser} {utilisateur.NomUser}"),
+                new(ClaimTypes.Email, utilisateur.CourrielUser!)
             };
+
+            if (await _context.Administrateurs.AnyAsync(a => a.IdUser == utilisateur.IdUser))
+                claims.Add(new Claim(ClaimTypes.Role, "Administrateur"));
+            if (await _context.Professeurs.AnyAsync(p => p.IdUser == utilisateur.IdUser))
+                claims.Add(new Claim(ClaimTypes.Role, "Professeur"));
+            if (await _context.Etudiants.AnyAsync(e => e.IdUser == utilisateur.IdUser))
+                claims.Add(new Claim(ClaimTypes.Role, "Etudiant"));
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(

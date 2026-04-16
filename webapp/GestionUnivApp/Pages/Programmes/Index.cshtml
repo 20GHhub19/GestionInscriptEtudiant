@@ -1,0 +1,34 @@
+@page
+@model GestionUnivApp.Pages.Programmes.IndexModel
+@{
+    ViewData["Title"] = "Programmes";
+}
+
+<h2 class="mb-4">Programmes offerts</h2>
+
+<div class="row g-4">
+    @foreach (var prog in Model.Programmes)
+    {
+        <div class="col-md-4">
+            <a asp-page="Details" asp-route-id="@prog.IdProg" class="text-decoration-none">
+                <div class="card shadow-sm h-100 border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-dark fs-6">@prog.CodeProg</span>
+                            <span class="badge bg-primary">@prog.NbCreditProg credits</span>
+                        </div>
+                        <h5 class="card-title text-dark">@prog.NomProg</h5>
+                        <p class="card-text text-muted small">@(prog.DescriptProg ?? "—")</p>
+                    </div>
+                    <div class="card-footer bg-white border-0">
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span>@(prog.DureeProg) ans</span>
+                            <span>@prog.CoursProgrammes.Count cours</span>
+                            <span>@prog.Etudiants.Count etudiants</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
+</div>

@@ -1,7 +1,263 @@
-﻿@page
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "Etudiant")]
+@page
 @model GestionUnivApp.Pages.Etudiant.EtudiantDashboardModel
+@{
+    ViewData["Title"] = "Mon dossier etudiant";
+}
 
-<h2>Tableau de bord Administrateur</h2>
-<p>Bienvenue dans l’espace réservé aux Étudiants.</p>
+<h2 class="mb-4">Mon dossier etudiant</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Info personnelle -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Informations personnelles</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><th style="width:40%">Matricule</th><td>@Model.Utilisateur.MatUser</td></tr>
+                    <tr><th>Nom</th><td>@Model.Utilisateur.NomUser</td></tr>
+                    <tr><th>Prenom</th><td>@Model.Utilisateur.PrenomUser</td></tr>
+                    <tr><th>Courriel</th><td>@Model.Utilisateur.CourrielUser</td></tr>
+                    <tr><th>Telephone</th><td>@(Model.Utilisateur.NumTelUser ?? "—")</td></tr>
+                    <tr><th>Date d'inscription</th><td>@Model.Utilisateur.DateInscriptUser.ToString("yyyy-MM-dd")</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Programme d'etudes</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Programme != null)
+                {
+                    <table class="table table-borderless mb-0">
+                        <tr><th style="width:40%">Programme</th><td>@Model.Programme.NomProg</td></tr>
+                        <tr><th>Code</th><td>@Model.Programme.CodeProg</td></tr>
+                        <tr><th>Credits requis</th><td>@Model.Programme.NbCreditProg</td></tr>
+                        <tr><th>Duree</th><td>@(Model.Programme.DureeProg) ans</td></tr>
+                        <tr><th>Statut</th><td>
+                            <span class="badge @(Model.Etudiant.StatutEtud == "Actif" ? "bg-success" : "bg-secondary")">
+                                @Model.Etudiant.StatutEtud
+                            </span>
+                        </td></tr>
+                        @if (Model.ChoixSpec != null)
+                        {
+                            <tr><th>Specialisation</th><td>@Model.ChoixSpec.IdSpecNavigation?.NomSpec</td></tr>
+                        }
+                    </table>
+                    @if (Model.ChoixSpec == null && Model.SpecialisationsDisponibles.Any())
+                    {
+                        <form method="post" asp-page-handler="ChoisirSpecialisation" class="d-flex align-items-center gap-2 mt-2">
+                            <select name="specId" class="form-select form-select-sm" required>
+                                <option value="">-- Choisir une specialisation --</option>
+                                @foreach (var spec in Model.SpecialisationsDisponibles)
+                                {
+                                    <option value="@spec.IdSpec">@spec.NomSpec (@spec.NbCreditSpec cr.)</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Choisir</button>
+                        </form>
+                    }
+                    <a class="btn btn-primary mt-2 me-2" asp-page="Inscription">S'inscrire a des cours</a>
+                    <form method="post" asp-page-handler="QuitterProgramme" class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger mt-2"
+                                onclick="return confirm('Voulez-vous vraiment quitter ce programme?')">
+                            Quitter le programme
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <p class="text-muted mb-3">Vous n'etes inscrit a aucun programme. Choisissez-en un pour commencer.</p>
+                    <form method="post" asp-page-handler="ChoisirProgramme">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Programme</label>
+                            <select name="programmeId" id="programmeSelect" class="form-select" required>
+                                <option value="">-- Choisir un programme --</option>
+                                @foreach (var prog in Model.ProgrammesDisponibles)
+                                {
+                                    <option value="@prog.IdProg" data-has-specs="@(prog.Specialisations.Any() ? "true" : "false")">
+                                        @prog.CodeProg - @prog.NomProg (@prog.NbCreditProg credits)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3" id="specSection" style="display:none;">
+                            <label class="form-label fw-bold">Specialisation (optionnel)</label>
+                            <select name="specId" id="specSelect" class="form-select">
+                                <option value="">-- Aucune --</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">S'inscrire au programme</button>
+                        <a class="btn btn-outline-secondary ms-2" asp-page="/Programmes/Index">Voir les programmes</a>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cours inscrits -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Mes inscriptions (@Model.Inscriptions.Count)</h5>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Inscriptions.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Cours</th>
+                            <th>Semestre</th>
+                            <th>Horaire</th>
+                            <th>Statut</th>
+                            <th>Note finale</th>
+                            <th>Lettre</th>
+                            <th>Decision</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var insc in Model.Inscriptions)
+                        {
+                            var cours = insc.IdCoursOfNavigation?.IdCoursNavigation;
+                            var semestre = insc.IdCoursOfNavigation?.IdSemestNavigation;
+                            <tr>
+                                <td><strong>@cours?.CodeCours</strong></td>
+                                <td>@cours?.NomCours</td>
+                                <td>@semestre?.NomSemest @semestre?.AnneeSemest</td>
+                                <td>@insc.IdCoursOfNavigation?.HoraireCoursOf</td>
+                                <td>
+                                    <span class="badge @(insc.StatutInscript == "Inscrit" ? "bg-success" : "bg-warning text-dark")">
+                                        @insc.StatutInscript
+                                    </span>
+                                </td>
+                                <td>@(insc.NoteFiInscript?.ToString("F2") ?? "—")</td>
+                                <td><strong>@(insc.NoteLetInscript ?? "—")</strong></td>
+                                <td>
+                                    @if (insc.DecisionFiInscript != null)
+                                    {
+                                        <span class="badge @(insc.DecisionFiInscript == "Reussi" ? "bg-success" : insc.DecisionFiInscript == "Echec" ? "bg-danger" : "bg-secondary")">
+                                            @insc.DecisionFiInscript
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>—</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (insc.StatutInscript == "Inscrit" && insc.DecisionFiInscript == null)
+                                    {
+                                        <form method="post" asp-page-handler="Desinscription" class="d-inline">
+                                            <input type="hidden" name="inscriptionId" value="@insc.IdInscript" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Se desinscrire de ce cours?')">
+                                                Se desinscrire
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="p-3 text-muted">Aucune inscription trouvee.</div>
+        }
+    </div>
+</div>
+
+<!-- Notes detaillees -->
+@foreach (var insc in Model.Inscriptions.Where(i => i.Notes.Any()))
+{
+    var cours = insc.IdCoursOfNavigation?.IdCoursNavigation;
+    <div class="card shadow-sm mb-3">
+        <div class="card-header">
+            <h6 class="mb-0">Notes - @cours?.CodeCours @cours?.NomCours</h6>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Evaluation</th>
+                        <th>Type</th>
+                        <th>Poids</th>
+                        <th>Note</th>
+                        <th>Lettre</th>
+                        <th>Retroaction</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var note in insc.Notes)
+                    {
+                        var eval = note.IdEvalNavigation;
+                        <tr>
+                            <td>@eval?.NomEval</td>
+                            <td>@eval?.TypeEval</td>
+                            <td>@(eval?.PoidsEval?.ToString("F0"))%</td>
+                            <td><strong>@note.ValNumNote.ToString("F2")</strong></td>
+                            <td>@note.ValLettreNote</td>
+                            <td>@(note.RetroAction ?? "—")</td>
+                            <td>@note.DateAttribNote?.ToString("yyyy-MM-dd")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (Model.Programme == null)
+{
+    @section Scripts {
+        <script>
+            const specsData = {
+                @foreach (var prog in Model.ProgrammesDisponibles.Where(p => p.Specialisations.Any()))
+                {
+                    @:@prog.IdProg: [
+                    foreach (var spec in prog.Specialisations)
+                    {
+                        @:{ id: @spec.IdSpec, name: "@spec.NomSpec (@(spec.NbCreditSpec) cr.)" },
+                    }
+                    @:],
+                }
+            };
+
+            document.getElementById('programmeSelect')?.addEventListener('change', function() {
+                const progId = parseInt(this.value);
+                const specSection = document.getElementById('specSection');
+                const specSelect = document.getElementById('specSelect');
+
+                if (specsData[progId]) {
+                    specSelect.innerHTML = '<option value="">-- Aucune --</option>';
+                    specsData[progId].forEach(s => {
+                        specSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                    });
+                    specSection.style.display = 'block';
+                } else {
+                    specSection.style.display = 'none';
+                    specSelect.innerHTML = '<option value="">-- Aucune --</option>';
+                }
+            });
+        </script>
+    }
+}
