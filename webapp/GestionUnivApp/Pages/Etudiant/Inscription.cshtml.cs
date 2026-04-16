@@ -1,8 +1,9 @@
-using System.Security.Claims;
+using System.Data;
 using GestionUnivApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestionUnivApp.Pages.Etudiant
@@ -24,7 +25,7 @@ namespace GestionUnivApp.Pages.Etudiant
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = User.GetUserId();
 
             var etudiant = await _context.Etudiants
                 .Include(e => e.ProgrammeEtudNavigation)
@@ -64,9 +65,10 @@ namespace GestionUnivApp.Pages.Etudiant
 
         public async Task<IActionResult> OnPostInscrireAsync(int coursOfId)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = User.GetUserId();
 
-            // Check for existing inscription (unique constraint)
+            // Re-enrollment path: if a cancelled inscription exists for the same course,
+            // reactivate it in-app (the stored procedure would be blocked by the UNIQUE constraint).
             var existante = await _context.Inscriptions
                 .FirstOrDefaultAsync(i => i.IdEtud == userId && i.IdCoursOf == coursOfId);
 
@@ -77,7 +79,7 @@ namespace GestionUnivApp.Pages.Etudiant
                     TempData["Error"] = "Vous etes deja inscrit a ce cours.";
                     return RedirectToPage();
                 }
-                // Re-enroll cancelled inscription
+
                 existante.StatutInscript = "Inscrit";
                 existante.DateInscript = DateOnly.FromDateTime(DateTime.Now);
                 existante.DateDesinscript = null;
@@ -85,35 +87,36 @@ namespace GestionUnivApp.Pages.Etudiant
                 existante.NoteFiInscript = null;
                 existante.NoteLetInscript = null;
                 existante.DecisionFiInscript = null;
+
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Inscription reussie!";
+                return RedirectToPage();
             }
-            else
+
+            // New enrollment: delegate to the stored procedure sp_InscrireEtudiantCours,
+            // which validates capacity and prerequisites inside a transaction.
+            var idEtudParam = new SqlParameter("@id_Etud", userId);
+            var coursOfParam = new SqlParameter("@id_CoursOf", coursOfId);
+            var idInscriptOut = new SqlParameter
             {
-                // Check capacity
-                var coursOf = await _context.CoursOfferts
-                    .Include(co => co.Inscriptions)
-                    .FirstOrDefaultAsync(co => co.IdCoursOf == coursOfId);
+                ParameterName = "@id_Inscript",
+                SqlDbType = SqlDbType.Int,
+                Direction = ParameterDirection.Output
+            };
 
-                if (coursOf == null) return NotFound();
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_InscrireEtudiantCours @id_Etud, @id_CoursOf, @id_Inscript OUTPUT",
+                    idEtudParam, coursOfParam, idInscriptOut);
 
-                var nbInscrits = coursOf.Inscriptions.Count(i => i.StatutInscript == "Inscrit");
-                if (nbInscrits >= coursOf.CapaciteCoursOf)
-                {
-                    TempData["Error"] = "Ce cours est complet.";
-                    return RedirectToPage();
-                }
-
-                _context.Inscriptions.Add(new Models.Inscription
-                {
-                    IdEtud = userId,
-                    IdCoursOf = coursOfId,
-                    StatutInscript = "Inscrit",
-                    DateInscript = DateOnly.FromDateTime(DateTime.Now),
-                    TentativeInscript = 1
-                });
+                TempData["Success"] = "Inscription reussie!";
+            }
+            catch (SqlException ex)
+            {
+                TempData["Error"] = ex.Message;
             }
 
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "Inscription reussie!";
             return RedirectToPage();
         }
     }

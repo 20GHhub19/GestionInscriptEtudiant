@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using GestionUnivApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -90,8 +89,7 @@ namespace GestionUnivApp.Pages.Administrateur
 
         public async Task<IActionResult> OnPostRemoveRoleAsync(int userId, string role)
         {
-            var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            if (role == "Administrateur" && userId == currentUserId)
+            if (role == "Administrateur" && userId == User.GetUserId())
             {
                 TempData["Error"] = "Vous ne pouvez pas retirer votre propre role administrateur.";
                 return RedirectToPage();

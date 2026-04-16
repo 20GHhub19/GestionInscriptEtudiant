@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using GestionUnivApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,19 +26,20 @@ namespace GestionUnivApp.Pages.Etudiant
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = User.GetUserId();
 
-            var utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.IdUser == userId);
+            // Utilisateur + Etudiant + Programme en une seule requete
             var etudiant = await _context.Etudiants
+                .Include(e => e.IdUserNavigation)
                 .Include(e => e.ProgrammeEtudNavigation)
                 .FirstOrDefaultAsync(e => e.IdUser == userId);
 
-            if (utilisateur == null || etudiant == null) return RedirectToPage("/Index");
+            if (etudiant == null || etudiant.IdUserNavigation == null)
+                return RedirectToPage("/Index");
 
-            Utilisateur = utilisateur;
+            Utilisateur = etudiant.IdUserNavigation;
             Etudiant = etudiant;
-
-            Programme = Etudiant.ProgrammeEtudNavigation;
+            Programme = etudiant.ProgrammeEtudNavigation;
 
             if (Programme == null)
             {
@@ -80,7 +80,7 @@ namespace GestionUnivApp.Pages.Etudiant
 
         public async Task<IActionResult> OnPostDesinscriptionAsync(int inscriptionId)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = User.GetUserId();
 
             var inscription = await _context.Inscriptions
                 .FirstOrDefaultAsync(i => i.IdInscript == inscriptionId && i.IdEtud == userId);
@@ -97,7 +97,7 @@ namespace GestionUnivApp.Pages.Etudiant
 
         public async Task<IActionResult> OnPostChoisirProgrammeAsync(int programmeId, int? specId)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = User.GetUserId();
 
             var etudiant = await _context.Etudiants
                 .FirstOrDefaultAsync(e => e.IdUser == userId);
@@ -126,7 +126,7 @@ namespace GestionUnivApp.Pages.Etudiant
 
         public async Task<IActionResult> OnPostChoisirSpecialisationAsync(int specId)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = User.GetUserId();
 
             _context.ChoixSpecialisations.Add(new ChoixSpecialisation
             {
@@ -143,7 +143,7 @@ namespace GestionUnivApp.Pages.Etudiant
 
         public async Task<IActionResult> OnPostQuitterProgrammeAsync()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = User.GetUserId();
 
             var etudiant = await _context.Etudiants
                 .FirstOrDefaultAsync(e => e.IdUser == userId);

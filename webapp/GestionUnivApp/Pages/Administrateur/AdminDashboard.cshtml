@@ -159,6 +159,48 @@
     </div>
 </div>
 
+<!-- Top moyennes (lu depuis la vue SQL v_MoyenneFinaleEtudiant) -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Top 10 des moyennes (vue <code>v_MoyenneFinaleEtudiant</code>)</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Rang</th>
+                        <th>Matricule</th>
+                        <th>Nom</th>
+                        <th>Nb cours</th>
+                        <th class="text-end">Moyenne generale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int rang = 1; }
+                    @foreach (var m in Model.TopMoyennes)
+                    {
+                        <tr>
+                            <td><strong>@rang</strong></td>
+                            <td>@m.MatUser</td>
+                            <td>@m.PrenomUser @m.NomUser</td>
+                            <td><span class="badge bg-secondary">@m.NbCoursSuivis</span></td>
+                            <td class="text-end">
+                                <strong>@(m.MoyenneGenerale?.ToString("0.00") ?? "—")</strong> / 20
+                            </td>
+                        </tr>
+                        rang++;
+                    }
+                    @if (!Model.TopMoyennes.Any())
+                    {
+                        <tr><td colspan="5" class="text-center text-muted">Aucune donnee</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <!-- Dernieres inscriptions -->
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-dark text-white">

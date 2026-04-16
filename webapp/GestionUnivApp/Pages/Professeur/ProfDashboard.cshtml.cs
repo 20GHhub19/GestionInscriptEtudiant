@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using GestionUnivApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,15 +23,16 @@ namespace GestionUnivApp.Pages.Professeur
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = User.GetUserId();
 
-            var utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.IdUser == userId);
-            var prof = await _context.Professeurs.FirstOrDefaultAsync(p => p.IdUser == userId);
+            var prof = await _context.Professeurs
+                .Include(p => p.IdUserNavigation)
+                .FirstOrDefaultAsync(p => p.IdUser == userId);
 
-            if (utilisateur == null || prof == null) return RedirectToPage("/Index");
+            if (prof?.IdUserNavigation == null) return RedirectToPage("/Index");
 
-            Utilisateur = utilisateur;
             Prof = prof;
+            Utilisateur = prof.IdUserNavigation;
 
             Enseignements = await _context.Enseigners
                 .Include(e => e.IdCoursOfNavigation)
@@ -57,7 +57,7 @@ namespace GestionUnivApp.Pages.Professeur
 
         public async Task<IActionResult> OnPostSaveNoteAsync(int inscriptionId, decimal? noteFi, string? noteLet, string? decision)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = User.GetUserId();
 
             var inscription = await _context.Inscriptions
                 .Include(i => i.IdCoursOfNavigation)
@@ -70,6 +70,12 @@ namespace GestionUnivApp.Pages.Professeur
             bool teachesThisCourse = inscription.IdCoursOfNavigation
                 .Enseigners.Any(e => e.IdProf == userId);
             if (!teachesThisCourse) return Forbid();
+
+            if (noteFi.HasValue && (noteFi < 0 || noteFi > 20))
+            {
+                TempData["Error"] = "Note invalide : doit etre entre 0 et 20.";
+                return RedirectToPage();
+            }
 
             inscription.NoteFiInscript = noteFi;
             inscription.NoteLetInscript = noteLet;

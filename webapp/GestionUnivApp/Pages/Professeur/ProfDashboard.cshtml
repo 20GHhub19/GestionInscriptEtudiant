@@ -2,7 +2,9 @@
 @model GestionUnivApp.Pages.Professeur.ProfDashboardModel
 @{
     ViewData["Title"] = "Tableau de bord professeur";
+    // Bareme UdeM aligne sur fn_NoteLettre (T-SQL). Note sur 20.
     var lettres = new[] { "A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "E", "F" };
+    var decisions = new[] { "Reussi", "Echec", "Abandon" };
 }
 
 <h2 class="mb-4">Tableau de bord professeur</h2>
@@ -11,6 +13,13 @@
 {
     <div class="alert alert-success alert-dismissible fade show">
         @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
@@ -92,54 +101,52 @@
                             @foreach (var insc in inscrits)
                             {
                                 var user = insc.IdEtudNavigation?.IdUserNavigation;
+                                var formId = $"frm-note-{insc.IdInscript}";
                                 <tr>
-                                    <td>@user?.MatUser</td>
-                                    <td>@user?.PrenomUser @user?.NomUser</td>
-                                    <td>
+                                    <td class="align-middle">@user?.MatUser</td>
+                                    <td class="align-middle">@user?.PrenomUser @user?.NomUser</td>
+                                    <td class="align-middle">
                                         <span class="badge @(insc.StatutInscript == "Inscrit" ? "bg-success" : "bg-warning text-dark")">
                                             @insc.StatutInscript
                                         </span>
                                     </td>
-                                    <td colspan="4">
-                                        <form method="post" asp-page-handler="SaveNote" class="d-flex align-items-center gap-2">
-                                            <input type="hidden" name="inscriptionId" value="@insc.IdInscript" />
+                                    <td class="align-middle">
+                                        <form method="post" asp-page-handler="SaveNote" id="@formId"></form>
+                                        <input type="hidden" name="inscriptionId" value="@insc.IdInscript" form="@formId" />
+                                        <div class="input-group input-group-sm" style="width:130px">
                                             <input type="number" name="noteFi" value="@insc.NoteFiInscript"
-                                                   step="0.01" min="0" max="100"
-                                                   class="form-control form-control-sm" style="width:80px"
-                                                   placeholder="Note" />
-                                            <select name="noteLet" class="form-select form-select-sm" style="width:75px">
-                                                <option value="">--</option>
-                                                @foreach (var l in lettres)
-                                                {
-                                                    if (insc.NoteLetInscript == l)
-                                                    {
-                                                        <option value="@l" selected>@l</option>
-                                                    }
-                                                    else
-                                                    {
-                                                        <option value="@l">@l</option>
-                                                    }
-                                                }
-                                            </select>
-                                            <select name="decision" class="form-select form-select-sm" style="width:110px">
-                                                <option value="">--</option>
-                                                @{
-                                                    var decisions = new[] { "Reussi", "Echec", "Abandon" };
-                                                }
-                                                @foreach (var d in decisions)
-                                                {
-                                                    if (insc.DecisionFiInscript == d)
-                                                    {
-                                                        <option value="@d" selected>@d</option>
-                                                    }
-                                                    else
-                                                    {
-                                                        <option value="@d">@d</option>
-                                                    }
-                                                }
-                                            </select>
-                                            <button type="submit" class="btn btn-sm btn-success">Sauvegarder</button>
-                                        </form>
+                                                   step="0.01" min="0" max="20"
+                                                   form="@formId"
+                                                   class="form-control note-input"
+                                                   data-inscription="@insc.IdInscript"
+                                                   placeholder="0-20" />
+                                            <span class="input-group-text">/ 20</span>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        <select name="noteLet" form="@formId"
+                                                class="form-select form-select-sm letter-select"
+                                                data-inscription="@insc.IdInscript"
+                                                style="width:70px">
+                                            <option value="">--</option>
+                                            @foreach (var l in lettres)
+                                            {
+                                                <option value="@l" selected="@(insc.NoteLetInscript == l)">@l</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td class="align-middle">
+                                        <select name="decision" form="@formId"
+                                                class="form-select form-select-sm" style="width:110px">
+                                            <option value="">--</option>
+                                            @foreach (var d in decisions)
+                                            {
+                                                <option value="@d" selected="@(insc.DecisionFiInscript == d)">@d</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td class="align-middle">
+                                        <button type="submit" form="@formId" class="btn btn-sm btn-success">Sauvegarder</button>
                                     </td>
                                 </tr>
                             }
@@ -153,4 +160,36 @@
             }
         </div>
     </div>
+}
+
+@section Scripts {
+<script>
+    // Auto-calcule la lettre en fonction de la note numerique (/20)
+    // Bareme UdeM, aligne sur fn_NoteLettre (T-SQL).
+    function calculerLettre(note) {
+        if (isNaN(note) || note === null || note === '') return '';
+        if (note >= 19) return 'A+';
+        if (note >= 18) return 'A';
+        if (note >= 17) return 'A-';
+        if (note >= 16) return 'B+';
+        if (note >= 15) return 'B';
+        if (note >= 14) return 'B-';
+        if (note >= 13) return 'C+';
+        if (note >= 12) return 'C';
+        if (note >= 11) return 'C-';
+        if (note >= 10) return 'D+';
+        if (note >= 9)  return 'D';
+        if (note >= 7)  return 'E';
+        return 'F';
+    }
+
+    document.querySelectorAll('.note-input').forEach(inp => {
+        inp.addEventListener('input', e => {
+            const id = e.target.dataset.inscription;
+            const val = parseFloat(e.target.value);
+            const sel = document.querySelector(`.letter-select[data-inscription="${id}"]`);
+            if (sel) sel.value = calculerLettre(val);
+        });
+    });
+</script>
 }

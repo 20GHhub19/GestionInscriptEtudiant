@@ -25,6 +25,7 @@ namespace GestionUnivApp.Pages.Administrateur
         public List<ProfesseurInfo> Professeurs { get; set; } = new();
         public List<Programme> Programmes { get; set; } = new();
         public List<Inscription> DernieresInscriptions { get; set; } = new();
+        public List<MoyenneEtudiantVue> TopMoyennes { get; set; } = new();
 
         public class EtudiantInfo
         {
@@ -38,6 +39,15 @@ namespace GestionUnivApp.Pages.Administrateur
             public Utilisateur User { get; set; } = null!;
             public Models.Professeur Prof { get; set; } = null!;
             public int NbCours { get; set; }
+        }
+
+        public class MoyenneEtudiantVue
+        {
+            public string MatUser { get; set; } = "";
+            public string NomUser { get; set; } = "";
+            public string PrenomUser { get; set; } = "";
+            public decimal? MoyenneGenerale { get; set; }
+            public int NbCoursSuivis { get; set; }
         }
 
         public async Task OnGetAsync()
@@ -81,6 +91,19 @@ namespace GestionUnivApp.Pages.Administrateur
                     .ThenInclude(co => co.IdCoursNavigation)
                 .OrderByDescending(i => i.DateInscript)
                 .Take(10)
+                .ToListAsync();
+
+            // Lecture via la vue SQL v_MoyenneFinaleEtudiant
+            TopMoyennes = await _context.Database
+                .SqlQueryRaw<MoyenneEtudiantVue>(
+                    @"SELECT TOP 10
+                         mat_User        AS MatUser,
+                         nom_User        AS NomUser,
+                         prenom_User     AS PrenomUser,
+                         moyenneGenerale AS MoyenneGenerale,
+                         nbCoursSuivis   AS NbCoursSuivis
+                      FROM v_MoyenneFinaleEtudiant
+                      ORDER BY moyenneGenerale DESC")
                 .ToListAsync();
         }
     }

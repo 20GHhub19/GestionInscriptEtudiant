@@ -37,6 +37,12 @@ docker exec -i SQL-Server /opt/mssql-tools/bin/sqlcmd \
   < database/requetes.sql
 ```
 
+```bash
+docker exec -i SQL-Server /opt/mssql-tools/bin/sqlcmd \
+  -S localhost -U sa -P "Gestion123!" -I -d GestionInscriptEtudiant \
+  < database/T-SQL.sql
+```
+
 ### 2. Application web
 
 ```bash
@@ -63,8 +69,9 @@ Se reconnecter pour activer le role.
 
 ```
 database/
-  LDD_LMD.sql          -- Schema et donnees initiales
-  requetes.sql          -- Requetes SQL et procedures stockees
+  LDD_LMD.sql          -- Schema et donnees initiales (LDD + LMD)
+  requetes.sql         -- 5 requetes simples + 5 requetes complexes
+  T-SQL.sql            -- Triggers, fonctions, procedures, curseur, vue
 
 webapp/GestionUnivApp/
   Models/               -- Entites (Utilisateur, Etudiant, Cours, etc.)

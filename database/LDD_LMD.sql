@@ -395,7 +395,9 @@ CREATE TABLE Inscription (
 	CONSTRAINT PK_Inscription PRIMARY KEY(id_Inscript),
 	CONSTRAINT FK_Inscription_Etudiant FOREIGN KEY(id_Etud) REFERENCES Etudiant(id_User),
 	CONSTRAINT FK_Inscription_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
-	CONSTRAINT UQ_Inscription_id_Etud_id_CoursOf UNIQUE(id_Etud, id_CoursOf) -- Évite une double inscription au même cours offert
+	CONSTRAINT UQ_Inscription_id_Etud_id_CoursOf UNIQUE(id_Etud, id_CoursOf), -- Évite une double inscription au même cours offert
+	CONSTRAINT CK_Inscription_noteLet CHECK (noteLet_Inscript IS NULL OR noteLet_Inscript IN
+		('A+','A','A-','B+','B','B-','C+','C','C-','D+','D','E','F'))
 )
 -- 14 -) Création de la table Note
 
@@ -409,7 +411,9 @@ CREATE TABLE Note (
 	id_Eval INT NOT NULL,
 	CONSTRAINT PK_Note PRIMARY KEY(id_Note),
 	CONSTRAINT FK_Note_Inscription FOREIGN KEY(id_Inscript) REFERENCES Inscription(id_Inscript),
-	CONSTRAINT FK_Note_Evaluation FOREIGN KEY(id_Eval) REFERENCES Evaluation(id_Eval)
+	CONSTRAINT FK_Note_Evaluation FOREIGN KEY(id_Eval) REFERENCES Evaluation(id_Eval),
+	CONSTRAINT CK_Note_ValLettre CHECK (ValLettre_Note IN
+		('A+','A','A-','B+','B','B-','C+','C','C-','D+','D','E','F'))
 )
 
 -- 15) Création de la table Restreindre
