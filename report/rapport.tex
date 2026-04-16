@@ -127,7 +127,7 @@
     \begin{tabular}{ll}
         \textbf{Édouard Bibeau}                  & 20247400 \\
         \textbf{Florion-Victor Buhendwa Chalazire} & 20364625 \\
-        \textbf{Gaius Heumen Nkouantchoua}        & \matGaius   \\
+        \textbf{Gaius Heumen Nkouantchoua}        & 20303413   \\
         \textbf{Imad Baida}                       & 20363685      \\
     \end{tabular}
 
@@ -351,7 +351,7 @@ Note --- Evaluation                   & 0,n --- 1,1   & Une note porte sur une �
 \section{Modèle relationnel}
 % =====================================================================
 
-La transformation du schéma E-A donne dix-sept relations. Les clés
+La transformation du schéma E-A donne dix-huit relations. Les clés
 primaires sont \underline{soulignées} et les clés étrangères préfixées
 par un \texttt{\#}.
 
@@ -492,7 +492,7 @@ Il y a par contre deux cas limites qu'on a identifiés et qu'on assume :
 \subsection{LDD --- création des tables}
 
 Le fichier \texttt{database/LDD\_LMD.sql} crée la base
-\texttt{GestionInscriptEtudiant}, les 17 tables avec leurs contraintes
+\texttt{GestionInscriptEtudiant}, les 18 tables avec leurs contraintes
 (PK, FK, CHECK, UNIQUE, DEFAULT), puis insère environ 190 lignes de
 données de test réparties sur toutes les tables.
 
@@ -512,7 +512,7 @@ CREATE TABLE Utilisateur (
     passwordHash_User VARCHAR(MAX),
     adresse_User VARCHAR(200),
     CONSTRAINT PK_Utilisateur PRIMARY KEY(id_User),
-    CONSTRAINT UQ_Utilisateur_courriel UNIQUE(courriel_User)
+    CONSTRAINT UQ_Utilisateur_courriel_User UNIQUE(courriel_User)
 );
 \end{lstlisting}
 
@@ -527,14 +527,14 @@ Le fichier \texttt{database/requetes.sql} contient :
     \item \textbf{5 requêtes complexes} (R6 à R10), toutes avec au moins
         4 tables jointes :
         \begin{enumerate}
-            \item[R6.] Bulletin complet d'un étudiant (7 tables).
-            \item[R7.] Moyenne pondérée par étudiant et par cours (6).
+            \item[R6.] Bulletin complet d'un étudiant (8 tables).
+            \item[R7.] Moyenne pondérée par étudiant et par cours (7).
             \item[R8.] Liste des profs avec leurs cours et le programme
-                associé (7).
+                associé (8).
             \item[R9.] Cours restreints par spécialisation avec le
                 programme parent (6).
             \item[R10.] Résumé d'une session d'examen avec le prof
-                responsable et la moyenne obtenue (8).
+                responsable et la moyenne obtenue (9).
         \end{enumerate}
 \end{itemize}
 
@@ -595,6 +595,16 @@ AFTER INSERT, UPDATE, DELETE
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    -- 1) Recalcul de la lettre individuelle de chaque note touchee.
+    UPDATE N
+    SET    N.ValLettre_Note = dbo.fn_NoteLettre(N.valNum_Note)
+    FROM   Note N
+    JOIN   inserted I ON N.id_Note = I.id_Note
+    WHERE  N.ValLettre_Note IS NULL
+        OR N.ValLettre_Note <> dbo.fn_NoteLettre(N.valNum_Note);
+
+    -- 2) Recalcul de la moyenne ponderee par inscription impactee.
     DECLARE @inscriptions TABLE (id_Inscript INT PRIMARY KEY);
     INSERT INTO @inscriptions (id_Inscript)
     SELECT DISTINCT id_Inscript FROM inserted
@@ -602,20 +612,22 @@ BEGIN
     SELECT DISTINCT id_Inscript FROM deleted;
 
     UPDATE I
-    SET I.noteFi_Inscript    = X.moyenne,
-        I.noteLet_Inscript   = dbo.fn_NoteLettre(X.moyenne),
-        I.decisionFi_Inscript =
-            CASE WHEN X.moyenne IS NULL THEN I.decisionFi_Inscript
-                 WHEN X.moyenne >= 10   THEN 'Réussi'
-                 ELSE 'Échec' END
-    FROM Inscription I
-    JOIN @inscriptions A ON I.id_Inscript = A.id_Inscript
+    SET    I.noteFi_Inscript    = X.moyenne,
+           I.noteLet_Inscript   = dbo.fn_NoteLettre(X.moyenne),
+           I.decisionFi_Inscript =
+               CASE
+                   WHEN X.moyenne IS NULL THEN I.decisionFi_Inscript
+                   WHEN X.moyenne >= 10   THEN 'Réussi'
+                   ELSE 'Échec'
+               END
+    FROM   Inscription I
+    JOIN   @inscriptions A ON I.id_Inscript = A.id_Inscript
     OUTER APPLY (
         SELECT CAST(SUM(N.valNum_Note * Ev.poids_Eval) /
                     NULLIF(SUM(Ev.poids_Eval), 0) AS DECIMAL(5,2)) AS moyenne
-        FROM Note N
-        JOIN Evaluation Ev ON N.id_Eval = Ev.id_Eval
-        WHERE N.id_Inscript = I.id_Inscript
+        FROM   Note N
+        JOIN   Evaluation Ev ON N.id_Eval = Ev.id_Eval
+        WHERE  N.id_Inscript = I.id_Inscript
     ) AS X;
 END;
 \end{lstlisting}
@@ -691,9 +703,37 @@ SGBD faire son travail.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth]{figures/home_page.jpg}
+    \includegraphics[width=\linewidth]{figures/home_page.png}
     \caption{Page d'accueil et formulaire de connexion.}
     \label{fig:home-page}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/dossier_etudiant.png}
+    \caption{Dossier de l'étudiant --- inscriptions, notes, informations personnelles.}
+    \label{fig:dossier-etudiant}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/tableau_de_bord_prof.png}
+    \caption{Tableau de bord du professeur --- saisie des notes des étudiants inscrits.}
+    \label{fig:dashboard-prof}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/tableau_de_board_admin.png}
+    \caption{Tableau de bord de l'administrateur --- statistiques globales et top des moyennes.}
+    \label{fig:dashboard-admin}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figures/affectation_prof_cours.png}
+    \caption{Interface d'affectation d'un professeur à un cours offert.}
+    \label{fig:affectation-prof-cours}
 \end{figure}
 
 
@@ -702,7 +742,7 @@ SGBD faire son travail.
 % =====================================================================
 
 Dans ce projet on a couvert toutes les étapes demandées : le modèle
-E-A avec 17 relations toutes en 3FN, la base SQL Server avec environ
+E-A avec 18 relations toutes en 3FN, la base SQL Server avec environ
 190 tuples de test, 10 requêtes SQL (5 simples et 5 complexes à 4
 tables ou plus), nos objets T-SQL (3 triggers, 3 fonctions, 3
 procédures dont une avec un curseur, et une vue) et finalement une
