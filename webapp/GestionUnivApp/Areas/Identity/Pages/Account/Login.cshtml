@@ -4,24 +4,115 @@
     ViewData["Title"] = "Connexion";
 }
 
-<h2>Connexion</h2>
 
-<form method="post">
-    <div class="form-group mb-3">
-        <label asp-for="Input.Email" class="form-label"></label>
-        <input asp-for="Input.Email" class="form-control" />
-        <span asp-validation-for="Input.Email" class="text-danger"></span>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
     </div>
+}
 
-    <div class="form-group mb-3">
-        <label asp-for="Input.Password" class="form-label"></label>
-        <input asp-for="Input.Password" type="password" class="form-control" />
-        <span asp-validation-for="Input.Password" class="text-danger"></span>
+<!-- WRAPPER QUI PLACE LE FORMULAIRE PLUS BAS ET CENTRÉ -->
+<div class="page-wrapper">
+    <div class="login-container shadow p-4 rounded bg-white">
+
+        <h2 class="mb-4 text-center">Connexion</h2>
+
+        <!-- Affichage des erreurs -->
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <form method="post" class="border p-4 rounded shadow-sm bg-light">
+
+            <!-- EMAIL -->
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label">Courriel</label>
+                <input asp-for="Input.Email" class="form-control" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="mb-3">
+                <label asp-for="Input.Password" class="form-label">Mot de passe</label>
+                <input asp-for="Input.Password" type="password" class="form-control" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-3">Se connecter</button>
+        </form>
     </div>
-
-    <button type="submit" class="btn btn-primary">Se connecter</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+
+<style>
+    /* Le body NE DOIT PAS être en flex, sinon la navbar casse */
+    body {
+        background: linear-gradient(135deg, #eef2f3, #dfe9f3);
+        min-height: 100vh;
+        font-family: "Inter", sans-serif;
+    }
+
+    /* Wrapper qui centre le formulaire SANS toucher la navbar */
+    .page-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 80px; /* espace sous la navbar */
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 420px; /* même largeur que l'inscription */
+        background: #ffffff;
+        padding: 30px 35px;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    h2 {
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #444;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 10px 12px;
+        border: 1px solid #ccc;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.15rem rgba(13,110,253,0.15);
+    }
+
+    .btn-primary {
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>

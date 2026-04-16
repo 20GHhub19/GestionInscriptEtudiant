@@ -1,0 +1,125 @@
+﻿@* Vue du composant Menu *@
+@using GestionUnivApp.Models.DTO
+
+@model List<MenuProgrammeBloc>
+
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle text-dark" href="#" data-bs-toggle="dropdown">
+        Nos programmes
+    </a>
+
+    <ul class="dropdown-menu multi-level">
+
+        @foreach (var prog in Model)
+        {
+            <li class="dropdown-submenu">
+                <a class="dropdown-item dropdown-toggle" asp-page="/Programmes/Details" asp-route-id="@prog.IdProg">@prog.NomProg</a>
+
+                <ul class="dropdown-menu">
+
+                    @if (prog.Blocs.Any(b => b.IdSpec != null))
+                    {
+                        <!-- CAS 1 : Le programme a des spécialisations -->
+                        <li class="dropdown-header">Spécialisation :</li>
+
+                        @foreach (var bloc in prog.Blocs.Where(b => b.IdSpec != null))
+                        {
+                            var hasRealCourses = bloc.Cours != null
+                                                 && bloc.Cours.Any(c => c != null
+                                                                     && !string.IsNullOrWhiteSpace(c.CodeCours)
+                                                                     && c.CodeCours != "-");
+
+                            if (hasRealCourses)
+                            {
+                                <!-- SPÉCIALISATION AVEC COURS (dropdown) -->
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle"
+                                           asp-page="/Specialisations/Details"
+                                           asp-route-id="@bloc.IdSpec">
+                                        @bloc.NomSpec
+                                    </a>
+
+
+                                    <ul class="dropdown-menu">
+                                        <li class="dropdown-header">Cours :</li>
+
+                                        @foreach (var c in bloc.Cours.Where(c => c != null
+                                                                                              && !string.IsNullOrWhiteSpace(c.CodeCours)
+                                                                                              && c.CodeCours != "-"))
+                                        {
+                                            <li>
+                                                <a class="dropdown-item"
+                                                       asp-page="/Cours/Details"
+                                                       asp-route-id="@c.IdCours">
+                                                    @c.CodeCours - @c.NomCours
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <!-- SPÉCIALISATION SANS COURS (simple item, pas de dropdown) -->
+                                <li>
+                                    <a class="dropdown-item text-muted"
+                                           asp-page="/Specialisations/Details"
+                                           asp-route-id="@bloc.IdSpec">
+                                        @bloc.NomSpec
+                                    </a>
+
+                                </li>
+                            }
+                        }
+
+
+                    }
+                    else
+                    {
+                        <!-- CAS 2 : Le programme n’a PAS de spécialisation -->
+                        <li class="dropdown-header">Cours :</li>
+
+                        @foreach (var bloc in prog.Blocs)
+                        {
+                            @foreach (var c in bloc.Cours)
+                            {
+                                <li>
+                                    <a class="dropdown-item"
+                                           asp-page="/Cours/Details"
+                                           asp-route-id="@c.IdCours">
+                                        @c.CodeCours - @c.NomCours
+                                    </a>
+                                </li>
+                            }
+                        }
+                    }
+
+                </ul>
+            </li>
+        }
+
+    </ul>
+</li>
+
+
+
+    <!-- SEMESTRES -->
+   @* <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle text-dark" href="#" data-bs-toggle="dropdown">
+            Semestres
+        </a>
+        <ul class="dropdown-menu">
+            @foreach (var s in Model)
+            {
+                <li>
+                    <a class="dropdown-item"
+                           asp-page="/Semestres/Details"
+                           asp-route-id="@s.IdSemest">
+                        @s.NomSemest (@s.AnneeSemest)
+                    </a>
+                </li>
+            }
+        </ul>
+    </li>
+    *@
+</ul>

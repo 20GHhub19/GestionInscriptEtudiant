@@ -29,3 +29,44 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* Sous-menu Bootstrap */
+.dropdown-submenu {
+    position: relative;
+}
+
+    .dropdown-submenu > .dropdown-menu {
+        top: 0;
+        left: 100%;
+        margin-left: .1rem;
+    }
+
+    /* Supprimer la flèche verticale Bootstrap */
+    .dropdown-submenu > a::after {
+        border: none !important;
+    }
+
+    /* Flèche horizontale uniquement */
+    .dropdown-submenu > a.dropdown-toggle::after {
+        content: "▸" !important;
+        float: right;
+        margin-left: .5rem;
+        opacity: .7;
+        border: none !important;
+    }
+
+
+    /* Alignement parfait des flèches ▸ */
+    .dropdown-submenu > a.dropdown-toggle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-right: 1.25rem; /* même marge pour tous */
+    }
+
+        .dropdown-submenu > a.dropdown-toggle::after {
+            margin-left: .5rem !important;
+            margin-right: 0 !important;
+            position: relative;
+            top: 1px; /* ajuste verticalement */
+        }

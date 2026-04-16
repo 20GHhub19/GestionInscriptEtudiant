@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace GestionUnivApp.Models;
 
 [Index("CodeCours", Name = "UQ__Cours__434D099AB748230D", IsUnique = true)]
-public partial class Cour
+public partial class Cours
 {
     [Key]
     [Column("id_Cours")]

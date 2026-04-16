@@ -21,7 +21,7 @@ public partial class CoursProgramme
 
     [ForeignKey("IdCours")]
     [InverseProperty("CoursProgrammes")]
-    public virtual Cour IdCoursNavigation { get; set; } = null!;
+    public virtual Cours IdCoursNavigation { get; set; } = null!;
 
     [ForeignKey("IdProg")]
     [InverseProperty("CoursProgrammes")]

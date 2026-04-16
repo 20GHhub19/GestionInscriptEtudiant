@@ -1,11 +1,12 @@
-﻿using System.Security.Claims;
-using BCrypt.Net;
+﻿using BCrypt.Net;
 using GestionUnivApp.Data;
 using GestionUnivApp.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace GestionUnivApp.Areas.Identity.Pages.Account
 {
@@ -34,7 +35,11 @@ namespace GestionUnivApp.Areas.Identity.Pages.Account
             if (!ModelState.IsValid)
                 return Page();
 
+            //var user = _context.Utilisateurs
+              //  .FirstOrDefault(u => u.CourrielUser == Input.Email);
             var user = _context.Utilisateurs
+                .Include(u => u.Administrateur)
+                .Include(u => u.Professeur)
                 .FirstOrDefault(u => u.CourrielUser == Input.Email);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(Input.Password, user.PasswordHashUser))
@@ -55,12 +60,20 @@ namespace GestionUnivApp.Areas.Identity.Pages.Account
                 new Claim(ClaimTypes.Role, role)
             };
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity(claims, 
+                CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity));
 
-            return Redirect("~/");
+            return role switch
+            {
+                "Administrateur" => RedirectToPage("/Administrateur/AdminDashboard"),
+                "Professeur" => RedirectToPage("/Professeur/ProfDashboard"),
+                _ => RedirectToPage("/Etudiant/EtudiantDashboard")
+            };
         }
     }
 }

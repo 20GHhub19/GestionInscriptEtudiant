@@ -53,7 +53,7 @@ public partial class CoursOffert
 
     [ForeignKey("IdCours")]
     [InverseProperty("CoursOfferts")]
-    public virtual Cour IdCoursNavigation { get; set; } = null!;
+    public virtual Cours IdCoursNavigation { get; set; } = null!;
 
     [InverseProperty("IdCoursOfNavigation")]
     public virtual ICollection<Inscription> Inscriptions { get; set; } = new List<Inscription>();

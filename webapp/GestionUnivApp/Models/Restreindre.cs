@@ -24,7 +24,7 @@ public partial class Restreindre
 
     [ForeignKey("IdCours")]
     [InverseProperty("Restreindres")]
-    public virtual Cour IdCoursNavigation { get; set; } = null!;
+    public virtual Cours IdCoursNavigation { get; set; } = null!;
 
     [ForeignKey("IdSpec")]
     [InverseProperty("Restreindres")]

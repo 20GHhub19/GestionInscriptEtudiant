@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using GestionUnivApp.Models;
+using GestionUnivApp.Models.DTO;
 
 namespace GestionUnivApp;
 
@@ -22,7 +23,7 @@ public partial class ApplicationDbContext : DbContext //: IdentityDbContext<Util
 
     public virtual DbSet<ChoixSpecialisation> ChoixSpecialisations { get; set; }
 
-    public virtual DbSet<Cour> Cours { get; set; }
+    public virtual DbSet<Cours> Cours { get; set; }
 
     public virtual DbSet<CoursOffert> CoursOfferts { get; set; }
 
@@ -53,12 +54,16 @@ public partial class ApplicationDbContext : DbContext //: IdentityDbContext<Util
     public virtual DbSet<Specialisation> Specialisations { get; set; }
 
     public virtual DbSet<Utilisateur> Utilisateurs { get; set; }
+    public DbSet<ProgrammesStructureRow> ProgrammesStructureRows { get; set; }
 
-   /*
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=GAIUSH;Database=GestionInscriptEtudiant;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");
-   */
+    public DbSet<ProgrammeDetailsRow> ProgrammeDetailsRows { get; set; }
+
+
+    /*
+     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+ #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+         => optionsBuilder.UseSqlServer("Server=GAIUSH;Database=GestionInscriptEtudiant;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");
+    */
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //Configuration de Identity pour Utilisateur
@@ -86,7 +91,7 @@ public partial class ApplicationDbContext : DbContext //: IdentityDbContext<Util
                 .HasConstraintName("FK_ChoixSpecialisation_Specialisation");
         });
 
-        modelBuilder.Entity<Cour>(entity =>
+        modelBuilder.Entity<Cours>(entity =>
         {
             entity.Property(e => e.TypeCours).HasDefaultValue("Théorique");
         });
@@ -231,6 +236,16 @@ public partial class ApplicationDbContext : DbContext //: IdentityDbContext<Util
             entity.Property(e => e.DateInscriptUser).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.MatUser).HasComputedColumnSql("((CONVERT([varchar](4),datepart(year,[dateInscriptUser]))+right('00'+CONVERT([varchar](2),datepart(month,[dateInscriptUser])),(2)))+right('0000'+CONVERT([varchar](4),[id_User]),(4)))", true);
         });
+
+        modelBuilder.Entity<ProgrammesStructureRow>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView(null); // Indique que ce n'est pas une table ou une vue dans la base de données
+        });
+
+        modelBuilder.Entity<ProgrammeDetailsRow>()
+        .HasNoKey();
+
 
         OnModelCreatingPartial(modelBuilder);
     }

@@ -20,9 +20,9 @@ public partial class CoursPrerequi
 
     [ForeignKey("IdCours")]
     [InverseProperty("CoursPrerequiIdCoursNavigations")]
-    public virtual Cour IdCoursNavigation { get; set; } = null!;
+    public virtual Cours IdCoursNavigation { get; set; } = null!;
 
     [ForeignKey("IdPrerequis")]
     [InverseProperty("CoursPrerequiIdPrerequisNavigations")]
-    public virtual Cour IdPrerequisNavigation { get; set; } = null!;
+    public virtual Cours IdPrerequisNavigation { get; set; } = null!;
 }

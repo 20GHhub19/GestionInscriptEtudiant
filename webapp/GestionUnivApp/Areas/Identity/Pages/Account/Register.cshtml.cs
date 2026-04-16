@@ -34,7 +34,7 @@ namespace GestionUnivApp.Areas.Identity.Pages.Account
             public string NumTelUser { get; set; } = null!;
             public string Role { get; set; } = "Etudiant"; // Valeur par défaut
             
-            public int ProgrammeEtud{  get; set; }
+            public int? ProgrammeEtud{  get; set; }
             public List<string> StatutEtud {  get; set; } = new() { "Inactif", "Actif", "Suspendu", "Gradué"};
             public string StatutChoisi {  get; set;} = "Actif";
 
@@ -61,7 +61,7 @@ namespace GestionUnivApp.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync()
         {
 
-            if (Input.Role == "Etudiant" && Input.ProgrammeEtud <= 0)
+            if (Input.Role == "Etudiant" && Input.ProgrammeEtud == null)
             {
                 ModelState.AddModelError("Input.ProgrammeEtud", "Veuillez choisir un programme.");
                 Programmes = _context.Programmes.ToList(); // recharger la liste
@@ -70,21 +70,24 @@ namespace GestionUnivApp.Areas.Identity.Pages.Account
 
             if (!ModelState.IsValid)
                 return Page();
-
-            // ==========================================================
-            // 1. Appel de la procédure stockée pour Créer un utilisateur
-            // ===========================================================
-            /* var user = new Utilisateur
-             {
-                 NomUser = Input.NomUser,
-                 PrenomUser = Input.PrenomUser,
-                 CourrielUser = Input.Email,
-                 AdresseUser = Input.AdresseUser,
-                 NumTelUser = Input.NumTelUser,
-                 DateNaisUser = Input.DateNaisUser,
-                 DateInscriptUser = DateOnly.FromDateTime(DateTime.Now),
-                 PasswordHashUser = BCrypt.Net.BCrypt.HashPassword(Input.Password)
-             };*/
+            // Insertion des paramètres conditionnels
+            var role = Input.Role;
+            
+            var programmeParam = new SqlParameter("programme_Etud",
+                role == "Etudiant" ? Input.ProgrammeEtud : (Object)DBNull.Value
+                );
+            var statutEtudParam = new SqlParameter("@statut_Etud",
+                role == "Etudiant" ? Input.StatutChoisi : (Object)DBNull.Value
+                );
+            var roleAdminParam = new SqlParameter("@role_Admin_Etud",
+                role == "Administrateur" ? Input.RoleAdminDefaut : (Object)DBNull.Value
+                );
+            var gradeProfParam = new SqlParameter("@grade_Prof",
+                role == "Professeur" ? Input.GradesParDefaut : (Object)DBNull.Value
+                );
+            var statutProfParam = new SqlParameter("statut_Prof",
+                role == "Professeur" ? Input.statutProfParDefaut : (Object)DBNull.Value
+                );
             var idUserParam = new SqlParameter
             {
                 ParameterName = "@id_User",
@@ -106,13 +109,19 @@ namespace GestionUnivApp.Areas.Identity.Pages.Account
                     new SqlParameter("@courriel_User", Input.Email),
                     new SqlParameter("@adresse_User", Input.AdresseUser),
                     new SqlParameter("@role", Input.Role),
+                    /*
                     new SqlParameter("@programme_Etud", Input.ProgrammeEtud),
                     new SqlParameter("@role_Admin_Etud", Input.RoleAdminDefaut),
                     new SqlParameter("@statut_Etud", Input.StatutChoisi),
                     new SqlParameter("@grade_Prof", Input.GradesParDefaut),
                     new SqlParameter("@statut_Prof", Input.statutProfParDefaut),
+                    */
+                    programmeParam,
+                    roleAdminParam,
+                    statutEtudParam,
+                    gradeProfParam,
+                    statutProfParam,
                     idUserParam
-
                     );
             } catch (SqlException ex)
             {
@@ -121,7 +130,7 @@ namespace GestionUnivApp.Areas.Identity.Pages.Account
                 return Page();
             }
             int newUserId = (int)idUserParam.Value;
-           // _context.Utilisateurs.Add(user);
+            // _context.Utilisateurs.Add(user);
             //await _context.SaveChangesAsync();
 
             // ============================
@@ -155,20 +164,30 @@ namespace GestionUnivApp.Areas.Identity.Pages.Account
             // ============================
             // 3. Connexion automatique
             // ============================
-            var claims = new List<Claim>
+            /* var claims = new List<Claim>
+             {
+                 new Claim(ClaimTypes.NameIdentifier, newUserId.ToString()),
+                 new Claim(ClaimTypes.Email, Input.Email),
+                 new Claim(ClaimTypes.Role, Input.Role)
+             };
+
+             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+             await HttpContext.SignInAsync(
+                 CookieAuthenticationDefaults.AuthenticationScheme,
+                 new ClaimsPrincipal(identity)
+             );
+            */
+
+            /*return role switch
             {
-                new Claim(ClaimTypes.NameIdentifier, newUserId.ToString()),
-                new Claim(ClaimTypes.Email, Input.Email),
-                new Claim(ClaimTypes.Role, Input.Role)
+                "Administrateur" => RedirectToPage("/Administrateur/AdminDashboard"),
+                "Professeur" => RedirectToPage("/Professeur/ProfDashboard"),
+                _ => RedirectToPage("/Etudiant/EtudiantDashboard")
             };
-
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(identity)
-            );
-
-            return Redirect("~/");
+            */
+            TempData["SuccessMessage"] = "Votre compte a été créé avec succès." +
+                "Veuillez vous connecter.";
+            return RedirectToPage("/Account/Login", new { area = "Identity" });
         }
     }
 }

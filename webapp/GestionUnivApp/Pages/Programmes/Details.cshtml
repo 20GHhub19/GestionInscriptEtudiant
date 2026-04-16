@@ -1,0 +1,68 @@
+﻿@page "{id:int}"
+@model GestionUnivApp.Pages.Programmes.DetailsModel
+
+<div class="container mt-4">
+
+    <h2>@Model.Programme.NomProg (@Model.Programme.CodeProg)</h2>
+    <p class="text-muted">@Model.Programme.DescriptProg</p>
+
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <h6>Durée</h6>
+            <p>@Model.Programme.DureeProg @Model.Programme.UniteProg</p>
+        </div>
+
+        <div class="col-md-3">
+            <h6>Crédits</h6>
+            <p>@Model.Programme.NbCreditProg crédits</p>
+        </div>
+
+        <div class="col-md-3">
+            <h6>Date de création</h6>
+            <p>@Model.Programme.DateCreatProg.ToShortDateString()</p>
+        </div>
+    </div>
+
+    <hr />
+
+    <h4>Spécialisations</h4>
+
+    @if (Model.Programme.Specialisations.Any(s => s.IdSpec != null))
+    {
+        @foreach (var s in Model.Programme.Specialisations.Where(s => s.IdSpec != null))
+        {
+            <div class="mb-4">
+                <h5>
+                    <a asp-page="/Specialisations/Details" asp-route-id="@s.IdSpec">
+                        @s.NomSpec
+                    </a>
+                </h5>
+
+                <p class="text-muted">@s.DescriptSpec</p>
+
+                @if (s.Cours.Any())
+                {
+                    <ul>
+                        @foreach (var c in s.Cours)
+                        {
+                            <li>
+                                <a asp-page="/Cours/Details" asp-route-id="@c.IdCours">
+                                    @c.CodeCours - @c.NomCours
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Aucun cours pour cette spécialisation.</p>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted">Ce programme ne possède pas de spécialisation.</p>
+    }
+
+</div>

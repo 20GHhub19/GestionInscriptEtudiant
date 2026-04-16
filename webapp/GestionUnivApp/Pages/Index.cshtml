@@ -4,7 +4,213 @@
     ViewData["Title"] = "Accueil";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- HERO SECTION -->
+<div class="hero-section">
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content text-center">
+        <!-- <img src="/images/logo-universite.png" alt="Université de Mont Réal" class="hero-logo" /> -->
+
+        <h1 class="hero-title">Université de Mont Réal</h1>
+        <p class="hero-subtitle">
+            Excellence académique, innovation et engagement pour l’avenir.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="/Identity/Account/Login" class="btn btn-primary btn-lg">Connexion</a>
+            <a href="/Identity/Account/Register" class="btn btn-outline-light btn-lg">Inscription</a>
+        </div>
+    </div>
 </div>
+
+<!-- SECTION À PROPOS -->
+<section class="section-about container">
+    <h2 class="section-title">À propos de l'université</h2>
+    <p class="section-text">
+        Fondée sur des valeurs d’excellence, de recherche et d’innovation, l’Université de Mont Réal
+        offre un environnement d’apprentissage moderne et dynamique. Nos programmes sont conçus pour
+        préparer les étudiants aux défis du monde contemporain.
+    </p>
+</section>
+
+<!-- SECTION PROGRAMMES -->
+<section class="section-programmes">
+    <div class="container">
+        <h2 class="section-title text-center">Nos programmes</h2>
+
+        <div class="programme-grid">
+            <div class="programme-card">
+                <img src="/images/Nos-Programmes/Informatique.jpg" class="programme-img" />
+                <h3>Informatique</h3>
+            </div>
+
+            <div class="programme-card">
+                <img src="/images/Nos-Programmes/Cybersécurité.jpg" class="programme-img" />
+                <h3>Cybersécurité</h3>
+            </div>
+
+            <div class="programme-card">
+                <img src="/images/Nos-Programmes/Science-de-données.jpg" class="programme-img" />
+                <h3>Science des données</h3>
+            </div>
+
+            <div class="programme-card">
+                <img src="/images/Nos-Programmes/Logiciel.jpg" class="programme-img" />
+                <h3>Ingénierie logicielle</h3>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION ACTUALITÉS -->
+<section class="section-news container">
+    <h2 class="section-title">Actualités</h2>
+
+    <div class="news-grid">
+        <div class="news-card">
+            <h4>Portes ouvertes 2026</h4>
+            <p>Découvrez nos programmes et rencontrez nos professeurs lors de notre journée portes ouvertes.</p>
+        </div>
+
+        <div class="news-card">
+            <h4>Nouvelle chaire en IA</h4>
+            <p>L’université inaugure une nouvelle chaire de recherche en intelligence artificielle appliquée.</p>
+        </div>
+
+        <div class="news-card">
+            <h4>Classement 2026</h4>
+            <p>Notre faculté d’informatique se classe parmi les meilleures au Canada.</p>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p>© 2026 Université de Mont Réal — Tous droits réservés</p>
+</footer>
+
+<style>
+    body {
+        background: #f5f7fa;
+        font-family: "Inter", sans-serif;
+    }
+
+    /* HERO */
+    .hero-section {
+        position: relative;
+        height: 70vh;
+        background-image: url('/images/Accueil.jpg');
+        background-size: cover;
+        background-position: center;
+        border-bottom: 4px solid #0d6efd;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        color: white;
+        padding-top: 120px;
+    }
+
+    .hero-logo {
+        width: 140px;
+        margin-bottom: 20px;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 700;
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 30px;
+    }
+
+    .hero-buttons .btn {
+        margin: 0 10px;
+        padding: 12px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    /* SECTIONS */
+    .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .section-about {
+        padding: 60px 0;
+        text-align: center;
+    }
+
+    .section-text {
+        font-size: 1.1rem;
+        color: #444;
+        max-width: 800px;
+        margin: auto;
+    }
+
+    /* PROGRAMMES */
+    .section-programmes {
+        background: #eef2f3;
+        padding: 60px 0;
+    }
+
+    .programme-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+    }
+
+    .programme-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        text-align: center;
+        padding-bottom: 15px;
+    }
+
+    .programme-img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    /* NEWS */
+    .section-news {
+        padding: 60px 0;
+    }
+
+    .news-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+    }
+
+    .news-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    /* FOOTER */
+    .footer {
+        background: #0d6efd;
+        color: white;
+        text-align: center;
+        padding: 20px;
+        margin-top: 40px;
+    }
+</style>

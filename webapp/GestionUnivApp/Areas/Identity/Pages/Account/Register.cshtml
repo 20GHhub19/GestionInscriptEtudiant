@@ -4,132 +4,136 @@
     ViewData["Title"] = "Créer un compte";
 }
 
-<h2 class="mb-4">Créer un compte</h2>
+<!-- WRAPPER QUI PLACE LE FORMULAIRE PLUS BAS ET CENTRÉ -->
+<div class="page-wrapper">
+    <div class="register-container shadow p-4 rounded bg-white">
 
-<!-- Affichage des erreurs SQL ou de validation -->
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        <h2 class="mb-4 text-center">Créer un compte</h2>
+
+        <!-- Affichage des erreurs -->
+        @if (!ViewData.ModelState.IsValid)
         {
-            <div>@error.ErrorMessage</div>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         }
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+        <form method="post" class="border p-4 rounded shadow-sm bg-light">
+
+            <!-- EMAIL -->
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label">Courriel</label>
+                <input asp-for="Input.Email" class="form-control" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="mb-3">
+                <label asp-for="Input.Password" class="form-label">Mot de passe</label>
+                <input asp-for="Input.Password" type="password" class="form-control" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <hr />
+
+            <!-- NOM -->
+            <div class="mb-3">
+                <label asp-for="Input.NomUser" class="form-label">Nom</label>
+                <input asp-for="Input.NomUser" class="form-control" />
+                <span asp-validation-for="Input.NomUser" class="text-danger"></span>
+            </div>
+
+            <!-- PRENOM -->
+            <div class="mb-3">
+                <label asp-for="Input.PrenomUser" class="form-label">Prénom</label>
+                <input asp-for="Input.PrenomUser" class="form-control" />
+                <span asp-validation-for="Input.PrenomUser" class="text-danger"></span>
+            </div>
+
+            <!-- DATE NAISSANCE -->
+            <div class="mb-3">
+                <label asp-for="Input.DateNaisUser" class="form-label">Date de naissance</label>
+                <input asp-for="Input.DateNaisUser" type="date" class="form-control" />
+                <span asp-validation-for="Input.DateNaisUser" class="text-danger"></span>
+            </div>
+
+            <!-- ADRESSE -->
+            <div class="mb-3">
+                <label asp-for="Input.AdresseUser" class="form-label">Adresse</label>
+                <input asp-for="Input.AdresseUser" class="form-control" />
+                <span asp-validation-for="Input.AdresseUser" class="text-danger"></span>
+            </div>
+
+            <!-- TELEPHONE -->
+            <div class="mb-3">
+                <label asp-for="Input.NumTelUser" class="form-label">Téléphone</label>
+                <input asp-for="Input.NumTelUser" class="form-control" />
+                <span asp-validation-for="Input.NumTelUser" class="text-danger"></span>
+            </div>
+
+            <hr />
+
+            <!-- ROLE -->
+            <div class="mb-3">
+                <label asp-for="Input.Role" class="form-label">Type d'utilisateur</label>
+                <select asp-for="Input.Role" class="form-select" id="role-select">
+                    <option value="Etudiant">Étudiant</option>
+                    <option value="Professeur">Professeur</option>
+                    <option value="Administrateur">Administrateur</option>
+                </select>
+            </div>
+
+            <!-- PROGRAMME -->
+            <div class="mb-3" id="programme-section">
+                <label asp-for="Input.ProgrammeEtud" class="form-label">Programme</label>
+                <select asp-for="Input.ProgrammeEtud"
+                        asp-items="@(new SelectList(Model.Programmes, "IdProg", "NomProg"))"
+                        class="form-select">
+                    <option value="">-- Choisir un programme --</option>
+                </select>
+            </div>
+
+            <!-- STATUT ETUDIANT -->
+            <div class="mb-3" id="statut-etud-section">
+                <label asp-for="Input.StatutChoisi" class="form-label">Statut étudiant</label>
+                <select asp-for="Input.StatutChoisi"
+                        asp-items="@(new SelectList(Model.Input.StatutEtud))"
+                        class="form-select">
+                </select>
+            </div>
+
+            <!-- PROFESSEUR -->
+            <div id="professeur-section" class="mb-3">
+                <label class="form-label">Grade du professeur</label>
+                <select asp-for="Input.GradesParDefaut"
+                        asp-items="@(new SelectList(Model.Input.GradesProfs))"
+                        class="form-select">
+                </select>
+
+                <label class="form-label mt-2">Statut du professeur</label>
+                <select asp-for="Input.statutProfParDefaut"
+                        asp-items="@(new SelectList(Model.Input.StatutsProfs))"
+                        class="form-select">
+                </select>
+            </div>
+
+            <!-- ADMIN -->
+            <div id="admin-section" class="mb-3">
+                <label class="form-label">Rôle administratif</label>
+                <select asp-for="Input.RoleAdminDefaut"
+                        asp-items="@(new SelectList(Model.Input.RoleAdmin))"
+                        class="form-select">
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-3">Créer le compte</button>
+        </form>
     </div>
-}
-
-<form method="post" class="border p-4 rounded shadow-sm bg-light">
-
-    <!-- EMAIL -->
-    <div class="mb-3">
-        <label asp-for="Input.Email" class="form-label"></label>
-        <input asp-for="Input.Email" class="form-control" />
-        <span asp-validation-for="Input.Email" class="text-danger"></span>
-    </div>
-
-    <!-- PASSWORD -->
-    <div class="mb-3">
-        <label asp-for="Input.Password" class="form-label"></label>
-        <input asp-for="Input.Password" type="password" class="form-control" />
-        <span asp-validation-for="Input.Password" class="text-danger"></span>
-    </div>
-
-    <hr />
-
-    <!-- NOM -->
-    <div class="mb-3">
-        <label asp-for="Input.NomUser" class="form-label"></label>
-        <input asp-for="Input.NomUser" class="form-control" />
-        <span asp-validation-for="Input.NomUser" class="text-danger"></span>
-    </div>
-
-    <!-- PRENOM -->
-    <div class="mb-3">
-        <label asp-for="Input.PrenomUser" class="form-label"></label>
-        <input asp-for="Input.PrenomUser" class="form-control" />
-        <span asp-validation-for="Input.PrenomUser" class="text-danger"></span>
-    </div>
-
-    <!-- DATE NAISSANCE -->
-    <div class="mb-3">
-        <label asp-for="Input.DateNaisUser" class="form-label"></label>
-        <input asp-for="Input.DateNaisUser" type="date" class="form-control" />
-        <span asp-validation-for="Input.DateNaisUser" class="text-danger"></span>
-    </div>
-
-    <!-- ADRESSE -->
-    <div class="mb-3">
-        <label asp-for="Input.AdresseUser" class="form-label"></label>
-        <input asp-for="Input.AdresseUser" class="form-control" />
-        <span asp-validation-for="Input.AdresseUser" class="text-danger"></span>
-    </div>
-
-    <!-- TELEPHONE -->
-    <div class="mb-3">
-        <label asp-for="Input.NumTelUser" class="form-label"></label>
-        <input asp-for="Input.NumTelUser" class="form-control" />
-        <span asp-validation-for="Input.NumTelUser" class="text-danger"></span>
-    </div>
-
-    <hr />
-
-    <!-- ROLE -->
-    <div class="mb-3">
-        <label asp-for="Input.Role" class="form-label">Rôle</label>
-        <select asp-for="Input.Role" class="form-select" id="role-select">
-            <option value="Etudiant">Étudiant</option>
-            <option value="Professeur">Professeur</option>
-            <option value="Administrateur">Administrateur</option>
-        </select>
-        <span asp-validation-for="Input.Role" class="text-danger"></span>
-    </div>
-
-    <!-- PROGRAMME (Étudiant) -->
-    <div class="mb-3" id="programme-section">
-        <label asp-for="Input.ProgrammeEtud" class="form-label">Programme</label>
-        <select asp-for="Input.ProgrammeEtud"
-                asp-items="@(new SelectList(Model.Programmes, "IdProg", "NomProg"))"
-                class="form-select">
-            <option value="">-- Choisir un programme --</option>
-        </select>
-        <span asp-validation-for="Input.ProgrammeEtud" class="text-danger"></span>
-    </div>
-
-    <!-- STATUT ETUDIANT -->
-    <div class="mb-3" id="statut-etud-section">
-        <label asp-for="Input.StatutChoisi" class="form-label">Statut étudiant</label>
-        <select asp-for="Input.StatutChoisi"
-                asp-items="@(new SelectList(Model.Input.StatutEtud))"
-                class="form-select">
-        </select>
-    </div>
-
-    <!-- CHAMPS PROFESSEUR -->
-    <div id="professeur-section" class="mb-3">
-        <label class="form-label">Grade du professeur</label>
-        <select asp-for="Input.GradesParDefaut"
-                asp-items="@(new SelectList(Model.Input.GradesProfs))"
-                class="form-select">
-        </select>
-
-        <label class="form-label mt-2">Statut du professeur</label>
-        <select asp-for="Input.statutProfParDefaut"
-                asp-items="@(new SelectList(Model.Input.StatutsProfs))"
-                class="form-select">
-        </select>
-    </div>
-
-    <!-- CHAMPS ADMIN -->
-    <div id="admin-section" class="mb-3">
-        <label class="form-label">Rôle administratif</label>
-        <select asp-for="Input.RoleAdminDefaut"
-                asp-items="@(new SelectList(Model.Input.RoleAdmin))"
-                class="form-select">
-        </select>
-    </div>
-
-    <button type="submit" class="btn btn-primary mt-3">Créer le compte</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -156,3 +160,77 @@
     </script>
 }
 
+<style>
+    /* Le body NE DOIT PAS être en flex, sinon la navbar casse */
+    body {
+        background: linear-gradient(135deg, #eef2f3, #dfe9f3);
+        min-height: 100vh;
+        font-family: "Inter", sans-serif;
+    }
+
+    /* Wrapper qui centre le formulaire SANS toucher la navbar */
+    .page-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 80px; /* espace sous la navbar */
+    }
+
+    .register-container {
+        width: 100%;
+        max-width: 600px;
+        background: #ffffff;
+        padding: 30px 35px;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    h2 {
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #444;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 10px 12px;
+        border: 1px solid #ccc;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.15rem rgba(13,110,253,0.15);
+    }
+
+    .btn-primary {
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    hr {
+        margin: 20px 0;
+        opacity: 0.15;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Sections dynamiques */
+    #programme-section,
+    #statut-etud-section,
+    #professeur-section,
+    #admin-section {
+        display: none;
+    }
+</style>
