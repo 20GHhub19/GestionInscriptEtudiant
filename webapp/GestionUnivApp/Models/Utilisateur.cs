@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-
 namespace GestionUnivApp.Models;
 
 [Table("Utilisateur")]
 [Index("MatUser", Name = "UQ__Utilisat__6FF7022121E542D1", IsUnique = true)]
-public partial class Utilisateur //: IdentityUser<int> //ajout de IdentityUser<int> pour
-                                                     //intégrer l'authentification ASP.NET Core Identity
+public partial class Utilisateur
 {
     [Key]
     [Column("id_User")]
@@ -30,7 +27,6 @@ public partial class Utilisateur //: IdentityUser<int> //ajout de IdentityUser<i
     public DateOnly DateInscriptUser { get; set; }
 
     [Column("mat_User")]
-    //[StringLength()]
     [Unicode(false)]
     public string? MatUser { get; set; }
 
