@@ -1,0 +1,7 @@
+﻿@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Etudiant")]
+@model GestionUnivApp.Pages.Etudiant.EtudiantDashboardModel
+
+<h2>Tableau de bord Administrateur</h2>
+<p>Bienvenue dans l’espace réservé aux Étudiants.</p>

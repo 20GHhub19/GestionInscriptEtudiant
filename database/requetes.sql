@@ -337,6 +337,7 @@ ORDER BY NombreEtudiants DESC;
 8- Écrire un triggers permettant de vérifier la somme poids d'évaluation
 9- Créer une vue affichant la moyenne de note final par étudiant
 10-Écrire une fonction stockée affichant les étudiants ayant une moyenne supérieure à une certaine note
+11-Écrire une procédure stockée permettant de vérifier la redondance d'une inscription
 
 
 ---- ####################### Requêtes de consultation de base simples (SELECT simples)
@@ -386,3 +387,53 @@ ORDER BY NombreEtudiants DESC;
 /*
 	Ajout des rôles de sécurité (à faire)
 */
+
+---######################### Procédure stockées ##############################
+
+-- 1- Écrire une procédure stockée qui permet de créer un nouvel utilisateur
+GO
+CREATE OR ALTER PROCEDURE CreationCompteUtilisateur 
+(
+	@nom_User VARCHAR(50),
+	@prenom_User VARCHAR(50),
+	@dateNais_User DATE,
+	@numTel_User VARCHAR(20),
+	@passwordHash_User VARCHAR(MAX),
+	@courriel_User VARCHAR(100),
+	@adresse_User VARCHAR(200),
+	@role VARCHAR(100),
+	@programme_Etud INT = NULL, --- NULL si l'étudiant n'a pas choisi
+	@role_Admin_Etud VARCHAR(100),
+	@statut_Etud VARCHAR(80),
+	@grade_Prof VARCHAR(50),
+	@statut_Prof VARCHAR(30),
+	@id_User INT OUTPUT
+)
+AS
+--- Définition de la procédure stockée
+BEGIN
+	IF EXISTS (
+		SELECT 1
+		FROM Utilisateur U
+		WHERE U.courriel_User = @courriel_User
+		)
+		BEGIN
+			RAISERROR('Cette adresse courriel a déjà été utilisée', 16, 1)
+			RETURN;
+		END
+		INSERT INTO Utilisateur (nom_User, prenom_User, dateNais_User, numTel_User, passwordHash_User, courriel_User, adresse_User )
+		VALUES(@nom_User, @prenom_User, @dateNais_User, @numTel_User, @passwordHash_User, @courriel_User, @adresse_User )
+
+		SET @id_User = SCOPE_IDENTITY(); ---- récupération de l'identifiant utilisateur 
+		
+		----------################### Insertion de rôles ####################----------------
+
+		IF		@role = 'Professeur'
+				INSERT INTO Professeur(id_User, grade_Prof, statut_Prof) VALUES(@id_User, @grade_Prof, @statut_Prof);
+		ELSE IF @role = 'Administrateur'
+				INSERT INTO Administrateur (id_User, role_Admin_Etud) VALUES (@id_User, @role_Admin_Etud);
+		ELSE
+				INSERT INTO Etudiant (id_User, statut_Etud, programme_Etud) VALUES (@id_User, @statut_Etud, @programme_Etud);
+END
+GO
+	
