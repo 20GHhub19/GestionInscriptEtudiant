@@ -1,0 +1,195 @@
+@page
+@model GestionUnivApp.Pages.Professeur.ProfDashboardModel
+@{
+    ViewData["Title"] = "Tableau de bord professeur";
+    // Bareme UdeM aligne sur fn_NoteLettre (T-SQL). Note sur 20.
+    var lettres = new[] { "A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "E", "F" };
+    var decisions = new[] { "Reussi", "Echec", "Abandon" };
+}
+
+<h2 class="mb-4">Tableau de bord professeur</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Info prof -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Mon profil</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><th>Nom</th><td>@Model.Utilisateur.PrenomUser @Model.Utilisateur.NomUser</td></tr>
+                    <tr><th>Matricule</th><td>@Model.Utilisateur.MatUser</td></tr>
+                    <tr><th>Grade</th><td>@Model.Prof.GradeProf</td></tr>
+                    <tr><th>Statut</th><td>@Model.Prof.StatutProf</td></tr>
+                    <tr><th>Courriel</th><td>@Model.Utilisateur.CourrielUser</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h2 class="display-5 fw-bold text-primary">@Model.Enseignements.Count</h2>
+                <p class="text-muted">Cours enseignes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h2 class="display-5 fw-bold text-success">@Model.TotalEtudiants</h2>
+                <p class="text-muted">Etudiants inscrits</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cours enseignes -->
+@foreach (var ens in Model.Enseignements)
+{
+    var coursOf = ens.IdCoursOfNavigation;
+    var cours = coursOf?.IdCoursNavigation;
+    var semestre = coursOf?.IdSemestNavigation;
+    var inscrits = coursOf?.Inscriptions?.ToList() ?? new List<GestionUnivApp.Models.Inscription>();
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">@cours?.CodeCours - @cours?.NomCours</h5>
+            <span class="badge bg-light text-dark">@semestre?.NomSemest @semestre?.AnneeSemest</span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-3"><strong>Horaire:</strong> @coursOf?.HoraireCoursOf</div>
+                <div class="col-md-3"><strong>Salle:</strong> @(coursOf?.SalleCoursOf ?? "—")</div>
+                <div class="col-md-3"><strong>Capacite:</strong> @coursOf?.CapaciteCoursOf</div>
+                <div class="col-md-3"><strong>Heures:</strong> @ens.NbHEnseigner h</div>
+            </div>
+
+            @if (inscrits.Any())
+            {
+                <h6>Etudiants inscrits (@inscrits.Count)</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Matricule</th>
+                                <th>Nom</th>
+                                <th>Statut</th>
+                                <th>Note finale</th>
+                                <th>Lettre</th>
+                                <th>Decision</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var insc in inscrits)
+                            {
+                                var user = insc.IdEtudNavigation?.IdUserNavigation;
+                                var formId = $"frm-note-{insc.IdInscript}";
+                                <tr>
+                                    <td class="align-middle">@user?.MatUser</td>
+                                    <td class="align-middle">@user?.PrenomUser @user?.NomUser</td>
+                                    <td class="align-middle">
+                                        <span class="badge @(insc.StatutInscript == "Inscrit" ? "bg-success" : "bg-warning text-dark")">
+                                            @insc.StatutInscript
+                                        </span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <form method="post" asp-page-handler="SaveNote" id="@formId"></form>
+                                        <input type="hidden" name="inscriptionId" value="@insc.IdInscript" form="@formId" />
+                                        <div class="input-group input-group-sm" style="width:130px">
+                                            <input type="number" name="noteFi" value="@insc.NoteFiInscript"
+                                                   step="0.01" min="0" max="20"
+                                                   form="@formId"
+                                                   class="form-control note-input"
+                                                   data-inscription="@insc.IdInscript"
+                                                   placeholder="0-20" />
+                                            <span class="input-group-text">/ 20</span>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        <select name="noteLet" form="@formId"
+                                                class="form-select form-select-sm letter-select"
+                                                data-inscription="@insc.IdInscript"
+                                                style="width:70px">
+                                            <option value="">--</option>
+                                            @foreach (var l in lettres)
+                                            {
+                                                <option value="@l" selected="@(insc.NoteLetInscript == l)">@l</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td class="align-middle">
+                                        <select name="decision" form="@formId"
+                                                class="form-select form-select-sm" style="width:110px">
+                                            <option value="">--</option>
+                                            @foreach (var d in decisions)
+                                            {
+                                                <option value="@d" selected="@(insc.DecisionFiInscript == d)">@d</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td class="align-middle">
+                                        <button type="submit" form="@formId" class="btn btn-sm btn-success">Sauvegarder</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Aucun etudiant inscrit.</p>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+    // Auto-calcule la lettre en fonction de la note numerique (/20)
+    // Bareme UdeM, aligne sur fn_NoteLettre (T-SQL).
+    function calculerLettre(note) {
+        if (isNaN(note) || note === null || note === '') return '';
+        if (note >= 19) return 'A+';
+        if (note >= 18) return 'A';
+        if (note >= 17) return 'A-';
+        if (note >= 16) return 'B+';
+        if (note >= 15) return 'B';
+        if (note >= 14) return 'B-';
+        if (note >= 13) return 'C+';
+        if (note >= 12) return 'C';
+        if (note >= 11) return 'C-';
+        if (note >= 10) return 'D+';
+        if (note >= 9)  return 'D';
+        if (note >= 7)  return 'E';
+        return 'F';
+    }
+
+    document.querySelectorAll('.note-input').forEach(inp => {
+        inp.addEventListener('input', e => {
+            const id = e.target.dataset.inscription;
+            const val = parseFloat(e.target.value);
+            const sel = document.querySelector(`.letter-select[data-inscription="${id}"]`);
+            if (sel) sel.value = calculerLettre(val);
+        });
+    });
+</script>
+}

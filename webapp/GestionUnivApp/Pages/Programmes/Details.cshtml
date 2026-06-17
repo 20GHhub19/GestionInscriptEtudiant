@@ -1,0 +1,131 @@
+@page "{id:int}"
+@model GestionUnivApp.Pages.Programmes.DetailsModel
+@{
+    ViewData["Title"] = Model.Programme.NomProg;
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-page="Index">Programmes</a></li>
+        <li class="breadcrumb-item active">@Model.Programme.NomProg</li>
+    </ol>
+</nav>
+
+<!-- Programme Header -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h2>
+                    <span class="badge bg-dark me-2">@Model.Programme.CodeProg</span>
+                    @Model.Programme.NomProg
+                </h2>
+                <p class="text-muted mb-2">@(Model.Programme.DescriptProg ?? "")</p>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-primary fs-6">@Model.Programme.NbCreditProg credits</span>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-3"><strong>Duree:</strong> @(Model.Programme.DureeProg) ans</div>
+            <div class="col-md-3"><strong>Unite:</strong> @(Model.Programme.UniteProg ?? "—")</div>
+            <div class="col-md-3"><strong>Date de creation:</strong> @Model.Programme.DateCreatProg?.ToString("yyyy-MM-dd")</div>
+            <div class="col-md-3"><strong>Nombre de cours:</strong> @Model.CoursDuProgramme.Count</div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Specialisations.Any())
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Specialisations</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nom</th>
+                        <th>Description</th>
+                        <th>Credits</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var spec in Model.Specialisations)
+                    {
+                        <tr>
+                            <td><strong>@spec.NomSpec</strong></td>
+                            <td>@(spec.DescriptSpec ?? "—")</td>
+                            <td>@spec.NbCreditSpec</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<!-- Cours du programme -->
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Cours du programme (@Model.CoursDuProgramme.Count)</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Code</th>
+                        <th>Nom du cours</th>
+                        <th>Credits</th>
+                        <th>Type</th>
+                        <th>Heures</th>
+                        <th>Prerequis</th>
+                        <th>Offert</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cp in Model.CoursDuProgramme)
+                    {
+                        var cours = cp.IdCoursNavigation;
+                        var prereqs = cours.CoursPrerequiIdCoursNavigations?.ToList() ?? new List<GestionUnivApp.Models.CoursPrerequi>();
+                        var offerts = cours.CoursOfferts?.ToList() ?? new List<GestionUnivApp.Models.CoursOffert>();
+                        <tr>
+                            <td><strong>@cours.CodeCours</strong></td>
+                            <td>@cours.NomCours</td>
+                            <td>@cours.CreditCours</td>
+                            <td><span class="badge bg-secondary">@cours.TypeCours</span></td>
+                            <td>@(cours.NbHeureCours ?? 0) h</td>
+                            <td>
+                                @if (prereqs.Any())
+                                {
+                                    @foreach (var pr in prereqs)
+                                    {
+                                        <span class="badge bg-warning text-dark me-1">@pr.IdPrerequisNavigation?.CodeCours</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Aucun</span>
+                                }
+                            </td>
+                            <td>
+                                @if (offerts.Any())
+                                {
+                                    @foreach (var co in offerts)
+                                    {
+                                        <span class="badge bg-info me-1">@co.IdSemestNavigation?.NomSemest @co.IdSemestNavigation?.AnneeSemest</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Non offert</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

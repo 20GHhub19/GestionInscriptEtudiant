@@ -1,0 +1,176 @@
+@page
+@model GestionUnivApp.Pages.Administrateur.GestionUtilisateursModel
+@{
+    ViewData["Title"] = "Gestion des utilisateurs";
+}
+
+<h2 class="mb-4">Gestion des utilisateurs et roles</h2>
+
+<a class="btn btn-outline-secondary mb-3" asp-page="AdminDashboard">Retour au tableau de bord</a>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="alert alert-info">
+    L'utilisateur devra se reconnecter pour que le nouveau role prenne effet.
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Matricule</th>
+                        <th>Nom</th>
+                        <th>Courriel</th>
+                        <th>Role actuel</th>
+                        <th>Detail</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model.Utilisateurs)
+                    {
+                        <tr>
+                            <td>@u.User.MatUser</td>
+                            <td>@u.User.PrenomUser @u.User.NomUser</td>
+                            <td>@u.User.CourrielUser</td>
+                            <td>
+                                @if (u.Role != null)
+                                {
+                                    <span class="badge @(u.Role == "Administrateur" ? "bg-danger" : u.Role == "Professeur" ? "bg-success" : "bg-primary")">
+                                        @u.Role
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Aucun role</span>
+                                }
+                            </td>
+                            <td>@(u.DetailRole ?? "—")</td>
+                            <td>
+                                @if (u.Role == null)
+                                {
+                                    <!-- Assign Etudiant -->
+                                    <button class="btn btn-sm btn-outline-primary" type="button"
+                                            data-bs-toggle="modal" data-bs-target="#modalEtud-@u.User.IdUser">
+                                        Etudiant
+                                    </button>
+                                    <!-- Assign Professeur -->
+                                    <button class="btn btn-sm btn-outline-success" type="button"
+                                            data-bs-toggle="modal" data-bs-target="#modalProf-@u.User.IdUser">
+                                        Professeur
+                                    </button>
+                                    <!-- Assign Admin -->
+                                    <form method="post" asp-page-handler="AssignAdmin" class="d-inline">
+                                        <input type="hidden" name="userId" value="@u.User.IdUser" />
+                                        <input type="hidden" name="roleAdmin" value="Gestionnaire" />
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Admin</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-page-handler="RemoveRole" class="d-inline">
+                                        <input type="hidden" name="userId" value="@u.User.IdUser" />
+                                        <input type="hidden" name="role" value="@u.Role" />
+                                        <button class="btn btn-sm btn-outline-dark" type="submit"
+                                                onclick="return confirm('Retirer le role @u.Role ?')">
+                                            Retirer role
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+
+                        @if (u.Role == null)
+                        {
+                            <!-- Modal Etudiant -->
+                            <tr style="display:none;"></tr>
+                            <!-- Using Bootstrap modal -->
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modals for role assignment -->
+@foreach (var u in Model.Utilisateurs.Where(u => u.Role == null))
+{
+    <!-- Modal Etudiant -->
+    <div class="modal fade" id="modalEtud-@u.User.IdUser" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="AssignEtudiant">
+                    <input type="hidden" name="userId" value="@u.User.IdUser" />
+                    <div class="modal-header">
+                        <h5 class="modal-title">Assigner Etudiant - @u.User.PrenomUser @u.User.NomUser</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Programme</label>
+                            <select name="programmeId" class="form-select" required>
+                                <option value="">-- Choisir un programme --</option>
+                                @foreach (var prog in Model.Programmes)
+                                {
+                                    <option value="@prog.IdProg">@prog.CodeProg - @prog.NomProg</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Assigner</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Professeur -->
+    <div class="modal fade" id="modalProf-@u.User.IdUser" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="AssignProfesseur">
+                    <input type="hidden" name="userId" value="@u.User.IdUser" />
+                    <div class="modal-header">
+                        <h5 class="modal-title">Assigner Professeur - @u.User.PrenomUser @u.User.NomUser</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Grade</label>
+                            <select name="grade" class="form-select" required>
+                                <option value="Charge de cours">Charge de cours</option>
+                                <option value="Professeur agrege">Professeur agrege</option>
+                                <option value="Professeur titulaire">Professeur titulaire</option>
+                                <option value="Professeur Emerite">Professeur Emerite</option>
+                                <option value="Maitre de conference">Maitre de conference</option>
+                                <option value="Auxilliaire de cours">Auxilliaire de cours</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-success">Assigner</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

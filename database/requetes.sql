@@ -31,22 +31,24 @@ JOIN Specialisation S ON R.id_Spec = S.id_Spec;
 
 -- R3) Lister les affectations d'enseignement : professeur, heures et période
 SELECT E.id_Enseigner,
-       P.nom_Prof,
-       P.prenom_Prof,
+       U.nom_User AS nom_Prof,
+       U.prenom_User AS prenom_Prof,
        E.nbH_Enseigner,
        E.datDeb_Enseigner,
        E.dateFin_Enseigner
 FROM Enseigner E
-JOIN Professeur P ON E.id_Prof = P.id_Prof;
+JOIN Professeur P  ON E.id_Prof = P.id_User
+JOIN Utilisateur U ON P.id_User = U.id_User;
 
 -- R4) Nombre total d'heures d'enseignement par professeur
-SELECT P.id_Prof,
-       P.nom_Prof,
-       P.prenom_Prof,
+SELECT P.id_User AS id_Prof,
+       U.nom_User AS nom_Prof,
+       U.prenom_User AS prenom_Prof,
        SUM(E.nbH_Enseigner) AS totalHeures
 FROM Enseigner E
-JOIN Professeur P ON E.id_Prof = P.id_Prof
-GROUP BY P.id_Prof, P.nom_Prof, P.prenom_Prof;
+JOIN Professeur P  ON E.id_Prof = P.id_User
+JOIN Utilisateur U ON P.id_User = U.id_User
+GROUP BY P.id_User, U.nom_User, U.prenom_User;
 
 -- R5) Moyenne des notes numériques par évaluation
 SELECT N.id_Eval,
@@ -66,9 +68,9 @@ GROUP BY N.id_Eval, Ev.nom_Eval;
 -- R6) Bulletin complet d'un étudiant : ses notes par évaluation,
 --     avec le nom du cours, le semestre et le type d'évaluation
 --     Relations : Note, Inscription, Etudiant, Evaluation, CoursOffert, Cours, Semestre (7)
-SELECT Et.mat_Etud,
-       Et.nom_Etud,
-       Et.prenom_Etud,
+SELECT U.mat_User AS mat_Etud,
+       U.nom_User AS nom_Etud,
+       U.prenom_User AS prenom_Etud,
        C.code_Cours,
        C.nom_Cours,
        Sem.nom_Semest,
@@ -80,19 +82,20 @@ SELECT Et.mat_Etud,
        N.ValLettre_Note
 FROM Note N
 JOIN Inscription I   ON N.id_Inscript = I.id_Inscript
-JOIN Etudiant Et     ON I.id_Etud = Et.id_Etud
+JOIN Etudiant Et     ON I.id_Etud = Et.id_User
+JOIN Utilisateur U   ON Et.id_User = U.id_User
 JOIN Evaluation Ev   ON N.id_Eval = Ev.id_Eval
 JOIN CoursOffert CO  ON I.id_CoursOf = CO.id_CoursOf
 JOIN Cours C         ON CO.id_Cours = C.id_Cours
 JOIN Semestre Sem    ON CO.id_Semest = Sem.id_Semest
-ORDER BY Et.mat_Etud, Sem.annee_Semest, C.code_Cours, Ev.date_Eval;
+ORDER BY U.mat_User, Sem.annee_Semest, C.code_Cours, Ev.date_Eval;
 
 -- R7) Moyenne pondérée finale par étudiant et par cours offert,
 --     en tenant compte du poids de chaque évaluation
 --     Relations : Note, Inscription, Etudiant, Evaluation, CoursOffert, Cours (6)
-SELECT Et.mat_Etud,
-       Et.nom_Etud,
-       Et.prenom_Etud,
+SELECT U.mat_User AS mat_Etud,
+       U.nom_User AS nom_Etud,
+       U.prenom_User AS prenom_Etud,
        C.code_Cours,
        C.nom_Cours,
        ROUND(
@@ -101,18 +104,19 @@ SELECT Et.mat_Etud,
        ) AS moyennePonderee
 FROM Note N
 JOIN Inscription I   ON N.id_Inscript = I.id_Inscript
-JOIN Etudiant Et     ON I.id_Etud = Et.id_Etud
+JOIN Etudiant Et     ON I.id_Etud = Et.id_User
+JOIN Utilisateur U   ON Et.id_User = U.id_User
 JOIN Evaluation Ev   ON N.id_Eval = Ev.id_Eval
 JOIN CoursOffert CO  ON I.id_CoursOf = CO.id_CoursOf
 JOIN Cours C         ON CO.id_Cours = C.id_Cours
-GROUP BY Et.mat_Etud, Et.nom_Etud, Et.prenom_Etud, C.code_Cours, C.nom_Cours;
+GROUP BY U.mat_User, U.nom_User, U.prenom_User, C.code_Cours, C.nom_Cours;
 
 -- R8) Liste des professeurs et les cours qu'ils enseignent,
 --     avec le programme associé, le semestre et la salle
 --     Relations : Enseigner, Professeur, CoursOffert, Cours, CoursProgramme, Programme, Semestre (7)
-SELECT P.code_Prof,
-       P.nom_Prof,
-       P.prenom_Prof,
+SELECT U.mat_User AS code_Prof,
+       U.nom_User AS nom_Prof,
+       U.prenom_User AS prenom_Prof,
        P.grade_Prof,
        C.code_Cours,
        C.nom_Cours,
@@ -123,13 +127,14 @@ SELECT P.code_Prof,
        CO.horaire_CoursOf,
        E.nbH_Enseigner
 FROM Enseigner E
-JOIN Professeur P     ON E.id_Prof = P.id_Prof
-JOIN CoursOffert CO   ON E.id_CoursOf = CO.id_CoursOf
-JOIN Cours C          ON CO.id_Cours = C.id_Cours
-JOIN Semestre Sem     ON CO.id_Semest = Sem.id_Semest
+JOIN Professeur P      ON E.id_Prof = P.id_User
+JOIN Utilisateur U     ON P.id_User = U.id_User
+JOIN CoursOffert CO    ON E.id_CoursOf = CO.id_CoursOf
+JOIN Cours C           ON CO.id_Cours = C.id_Cours
+JOIN Semestre Sem      ON CO.id_Semest = Sem.id_Semest
 JOIN CoursProgramme CP ON C.id_Cours = CP.id_Cours
-JOIN Programme Prog   ON CP.id_Prog = Prog.id_Prog
-ORDER BY P.nom_Prof, Sem.annee_Semest;
+JOIN Programme Prog    ON CP.id_Prog = Prog.id_Prog
+ORDER BY U.nom_User, Sem.annee_Semest;
 
 -- R9) Cours restreints par spécialisation avec le programme parent,
 --     le nombre de crédits du cours et la capacité du cours offert
@@ -163,8 +168,8 @@ SELECT Sem.nom_Semest,
        C.nom_Cours,
        Ev.nom_Eval,
        Ev.type_Eval,
-       P.nom_Prof,
-       P.prenom_Prof,
+       U.nom_User AS nom_Prof,
+       U.prenom_User AS prenom_Prof,
        COUNT(N.id_Note) AS nbNotes,
        AVG(N.valNum_Note) AS moyenneNotes
 FROM SessionExamen SE
@@ -173,12 +178,150 @@ JOIN Evaluation Ev    ON Ev.id_SessExam = SE.id_SessExam
 JOIN CoursOffert CO   ON Ev.id_CoursOf = CO.id_CoursOf
 JOIN Cours C          ON CO.id_Cours = C.id_Cours
 JOIN Enseigner E      ON E.id_CoursOf = CO.id_CoursOf
-JOIN Professeur P     ON E.id_Prof = P.id_Prof
+JOIN Professeur P     ON E.id_Prof = P.id_User
+JOIN Utilisateur U    ON P.id_User = U.id_User
 LEFT JOIN Note N      ON N.id_Eval = Ev.id_Eval
 GROUP BY Sem.nom_Semest, Sem.annee_Semest, SE.type_SessExam, SE.dateDeb,
          C.code_Cours, C.nom_Cours, Ev.nom_Eval, Ev.type_Eval,
-         P.nom_Prof, P.prenom_Prof
+         U.nom_User, U.prenom_User
 ORDER BY Sem.annee_Semest, SE.dateDeb, C.code_Cours;
+
+
+
+-- REQUÊTES COMPLEXES (au moins 4 relations)
+
+-- Afficher les professeurs avec les cours qu'ils enseignent
+SELECT 
+    p.id_User AS id_Professeur,
+    u.nom_User AS nom,
+    u.prenom_User AS prenom,
+    p.grade_Prof,
+    p.statut_Prof,
+    c.code_Cours,
+    c.nom_Cours,
+    co.sect_CoursOf,
+    co.horaire_CoursOf
+FROM Professeur p
+JOIN Utilisateur u ON p.id_User = u.id_User
+JOIN Enseigner e ON p.id_User = e.id_Prof
+JOIN CoursOffert co ON e.id_CoursOf = co.id_CoursOf
+JOIN Cours c ON co.id_Cours = c.id_Cours
+ORDER BY u.nom_User, c.nom_Cours;
+
+
+-- Afficher les étudiants avec leur programme et les cours auxquels ils sont inscrits
+SELECT 
+    e.id_User AS id_Etudiant,
+    u.nom_User AS nom,
+    u.prenom_User AS prenom,
+    p.nom_Prog AS programme,
+    c.code_Cours,
+    c.nom_Cours,
+    i.statut_Inscript,
+    i.noteFi_Inscript,
+    i.noteLet_Inscript
+FROM Etudiant e
+JOIN Utilisateur u ON e.id_User = u.id_User
+JOIN Programme p ON e.programme_Etud = p.id_Prog
+JOIN Inscription i ON e.id_User = i.id_Etud
+JOIN CoursOffert co ON i.id_CoursOf = co.id_CoursOf
+JOIN Cours c ON co.id_Cours = c.id_Cours
+ORDER BY u.nom_User, c.nom_Cours;
+
+
+-- Afficher les évaluations avec le cours offert, la session d'examen et le semestre
+SELECT 
+    ev.id_Eval,
+    ev.nom_Eval,
+    ev.type_Eval,
+    ev.date_Eval,
+    ev.poids_Eval,
+    c.nom_Cours,
+    se.type_SessExam,
+    s.nom_Semest,
+    s.annee_Semest
+FROM Evaluation ev
+JOIN CoursOffert co ON ev.id_CoursOf = co.id_CoursOf
+JOIN Cours c ON co.id_Cours = c.id_Cours
+JOIN SessionExamen se ON ev.id_SessExam = se.id_SessExam
+JOIN Semestre s ON se.id_Semest = s.id_Semest
+ORDER BY s.annee_Semest, s.nom_Semest, c.nom_Cours;
+
+
+-- Afficher les notes des étudiants pour chaque évaluation et chaque cours
+SELECT 
+    u.nom_User AS nom,
+    u.prenom_User AS prenom,
+    c.nom_Cours,
+    ev.nom_Eval,
+    ev.type_Eval,
+    n.valNum_Note,
+    n.ValLettre_Note,
+    n.dateAttrib_Note
+FROM Note n
+JOIN Inscription i ON n.id_Inscript = i.id_Inscript
+JOIN Etudiant e ON i.id_Etud = e.id_User
+JOIN Utilisateur u ON e.id_User = u.id_User
+JOIN Evaluation ev ON n.id_Eval = ev.id_Eval
+JOIN CoursOffert co ON ev.id_CoursOf = co.id_CoursOf
+JOIN Cours c ON co.id_Cours = c.id_Cours
+ORDER BY u.nom_User, c.nom_Cours, ev.date_Eval;
+
+
+-- Afficher les choix de spécialisation des étudiants avec leur programme
+SELECT 
+    u.nom_User AS nom,
+    u.prenom_User AS prenom,
+    cs.date_ChoixSpec,
+    cs.nb_ChoixSpec,
+    sp.nom_Spec AS specialisation,
+    p.nom_Prog AS programme
+FROM ChoixSpecialisation cs
+JOIN Etudiant e ON cs.id_Etud = e.id_User
+JOIN Utilisateur u ON e.id_User = u.id_User
+JOIN Specialisation sp ON cs.id_Spec = sp.id_Spec
+JOIN Programme p ON e.programme_Etud = p.id_Prog
+ORDER BY u.nom_User, cs.nb_ChoixSpec;
+
+
+-- REQUÊTES SIMPLES
+
+-- Afficher tous les semestres
+SELECT *
+FROM Semestre;
+
+
+-- Afficher les semestres d'hiver
+SELECT *
+FROM Semestre
+WHERE nom_Semest = 'Hiver';
+
+
+-- Compter le nombre total de professeurs
+SELECT COUNT(*) AS NombreTotalProfesseurs
+FROM Professeur;
+
+
+-- Afficher les professeurs avec leur nom et prénom
+SELECT 
+    p.id_User,
+    u.nom_User,
+    u.prenom_User,
+    p.grade_Prof,
+    p.statut_Prof
+FROM Professeur p
+JOIN Utilisateur u ON p.id_User = u.id_User
+ORDER BY u.nom_User;
+
+
+-- Compter le nombre d'étudiants par programme
+SELECT 
+    p.nom_Prog,
+    COUNT(e.id_User) AS NombreEtudiants
+FROM Etudiant e
+JOIN Programme p ON e.programme_Etud = p.id_Prog
+GROUP BY p.nom_Prog
+ORDER BY NombreEtudiants DESC;
 
 
 /*
@@ -194,6 +337,7 @@ ORDER BY Sem.annee_Semest, SE.dateDeb, C.code_Cours;
 8- Écrire un triggers permettant de vérifier la somme poids d'évaluation
 9- Créer une vue affichant la moyenne de note final par étudiant
 10-Écrire une fonction stockée affichant les étudiants ayant une moyenne supérieure à une certaine note
+11-Écrire une procédure stockée permettant de vérifier la redondance d'une inscription
 
 
 ---- ####################### Requêtes de consultation de base simples (SELECT simples)
@@ -243,3 +387,53 @@ ORDER BY Sem.annee_Semest, SE.dateDeb, C.code_Cours;
 /*
 	Ajout des rôles de sécurité (à faire)
 */
+
+---######################### Procédure stockées ##############################
+
+-- 1- Écrire une procédure stockée qui permet de créer un nouvel utilisateur
+GO
+CREATE OR ALTER PROCEDURE CreationCompteUtilisateur 
+(
+	@nom_User VARCHAR(50),
+	@prenom_User VARCHAR(50),
+	@dateNais_User DATE,
+	@numTel_User VARCHAR(20),
+	@passwordHash_User VARCHAR(MAX),
+	@courriel_User VARCHAR(100),
+	@adresse_User VARCHAR(200),
+	@role VARCHAR(100),
+	@programme_Etud INT = NULL, --- NULL si l'étudiant n'a pas choisi
+	@role_Admin_Etud VARCHAR(100),
+	@statut_Etud VARCHAR(80),
+	@grade_Prof VARCHAR(50),
+	@statut_Prof VARCHAR(30),
+	@id_User INT OUTPUT
+)
+AS
+--- Définition de la procédure stockée
+BEGIN
+	IF EXISTS (
+		SELECT 1
+		FROM Utilisateur U
+		WHERE U.courriel_User = @courriel_User
+		)
+		BEGIN
+			RAISERROR('Cette adresse courriel a déjà été utilisée', 16, 1)
+			RETURN;
+		END
+		INSERT INTO Utilisateur (nom_User, prenom_User, dateNais_User, numTel_User, passwordHash_User, courriel_User, adresse_User )
+		VALUES(@nom_User, @prenom_User, @dateNais_User, @numTel_User, @passwordHash_User, @courriel_User, @adresse_User )
+
+		SET @id_User = SCOPE_IDENTITY(); ---- récupération de l'identifiant utilisateur 
+		
+		----------################### Insertion de rôles ####################----------------
+
+		IF		@role = 'Professeur'
+				INSERT INTO Professeur(id_User, grade_Prof, statut_Prof) VALUES(@id_User, @grade_Prof, @statut_Prof);
+		ELSE IF @role = 'Administrateur'
+				INSERT INTO Administrateur (id_User, role_Admin_Etud) VALUES (@id_User, @role_Admin_Etud);
+		ELSE
+				INSERT INTO Etudiant (id_User, statut_Etud, programme_Etud) VALUES (@id_User, @statut_Etud, @programme_Etud);
+END
+GO
+	

@@ -1,0 +1,121 @@
+@page
+@model GestionUnivApp.Pages.Administrateur.AffectationCoursModel
+@{
+    ViewData["Title"] = "Affectation des cours";
+}
+
+<h2 class="mb-4">Affectation des cours aux professeurs</h2>
+
+<a class="btn btn-outline-secondary mb-3" asp-page="AdminDashboard">Retour au tableau de bord</a>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Assigner un cours -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Assigner un cours a un professeur</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" asp-page-handler="Assigner" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Professeur</label>
+                <select name="profId" class="form-select" required>
+                    <option value="">-- Choisir --</option>
+                    @foreach (var p in Model.Professeurs)
+                    {
+                        <option value="@p.Prof.IdUser">@p.User.PrenomUser @p.User.NomUser</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Cours offert</label>
+                <select name="coursOfId" class="form-select" required>
+                    <option value="">-- Choisir --</option>
+                    @foreach (var co in Model.CoursOfferts)
+                    {
+                        <option value="@co.IdCoursOf">
+                            @co.IdCoursNavigation?.CodeCours - @co.IdCoursNavigation?.NomCours
+                            (@co.IdSemestNavigation?.NomSemest @co.IdSemestNavigation?.AnneeSemest)
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Heures</label>
+                <input type="number" name="nbHeures" class="form-control" value="45" min="1" required />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Assigner</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Affectations par professeur -->
+@foreach (var prof in Model.Professeurs)
+{
+    <div class="card shadow-sm mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">@prof.User.PrenomUser @prof.User.NomUser <span class="text-muted">— @prof.Prof.GradeProf</span></h6>
+            <span class="badge bg-info">@prof.Enseignements.Count cours</span>
+        </div>
+        @if (prof.Enseignements.Any())
+        {
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Cours</th>
+                            <th>Semestre</th>
+                            <th>Heures</th>
+                            <th>Periode</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ens in prof.Enseignements)
+                        {
+                            var co = ens.IdCoursOfNavigation;
+                            var cours = co?.IdCoursNavigation;
+                            var sem = co?.IdSemestNavigation;
+                            <tr>
+                                <td><strong>@cours?.CodeCours</strong></td>
+                                <td>@cours?.NomCours</td>
+                                <td>@sem?.NomSemest @sem?.AnneeSemest</td>
+                                <td>@ens.NbHEnseigner h</td>
+                                <td>@ens.DatDebEnseigner?.ToString("yyyy-MM-dd") — @ens.DateFinEnseigner?.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <form method="post" asp-page-handler="Retirer" class="d-inline">
+                                        <input type="hidden" name="enseignerId" value="@ens.IdEnseigner" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Retirer cette affectation?')">
+                                            Retirer
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="card-body text-muted">Aucun cours assigne.</div>
+        }
+    </div>
+}

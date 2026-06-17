@@ -11,7 +11,7 @@ GO
 -- On supprime la base de données juste si elle existe.
 -- Cela évite une erreur si on a jamais exécuté le script.
 --DROP DATABASE IF EXISTS GestionInscriptEtudiant;
---IF NOT USE DATABASE 
+--IF NOT USE DATABASE
 
 -- Création de la base de données si elle n'existe pas
 IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'GestionInscriptEtudiant')
@@ -98,7 +98,7 @@ IF EXISTS (
 		ALTER TABLE Evaluation
 		DROP CONSTRAINT FK_Evaluation_CoursOffert, FK_Evaluation_SessionExamen;
 	END
-	
+
 IF EXISTS (
 	SELECT 1
 	FROM sys.foreign_keys
@@ -218,33 +218,36 @@ CREATE TABLE Specialisation (
 )
 CREATE TABLE Utilisateur (
 	id_User INT  IDENTITY (100, 1),
-	nom_User VARCHAR(15) NOT NULL,
-	prenom_User VARCHAR(20) NOT NULL,
+	nom_User VARCHAR(50) NOT NULL,
+	prenom_User VARCHAR(50) NOT NULL,
 	dateInscriptUser DATE NOT NULL DEFAULT GETDATE(),
 	mat_User AS (CAST(YEAR(dateInscriptUser) AS VARCHAR(4)) +
 	RIGHT('00' + CAST(MONTH(dateInscriptUser) AS VARCHAR(2)), 2) +
 	RIGHT('0000' + CAST(id_User AS VARCHAR(4)), 4)) PERSISTED UNIQUE,
 	dateNais_User Date NOT NULL,
-	numTel_User VARCHAR(15),
+	numTel_User VARCHAR(20),
 	CHECK(numTel_User IS NULL OR numTel_User LIKE '[1-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
-	courriel_User VARCHAR(30),
-	CHECK(courriel_User LIKE '%_@_%._%'), 
-	adresse_User  VARCHAR(80),
-	CONSTRAINT PK_Utilisateur PRIMARY KEY(id_User)
+	courriel_User VARCHAR(100),
+	CHECK(courriel_User LIKE '%_@_%._%'),
+	passwordHash_User VARCHAR(MAX),
+	adresse_User  VARCHAR(200),
+	CONSTRAINT PK_Utilisateur PRIMARY KEY(id_User),
+	CONSTRAINT UQ_Utilisateur_courriel_User UNIQUE(courriel_User)
 )
+
 
 CREATE TABLE Administrateur (
 	id_User INT NOT NULL,
-	role_Admin_Etud VARCHAR(30) NOT NULL,
+	role_Admin_Etud VARCHAR(100) NOT NULL,
 	CONSTRAINT PK_Administarteur PRIMARY KEY (id_User),
-	CONSTRAINT FK_Administrateur_Utilisateur FOREIGN KEY(id_User) REFERENCES Utilisateur(id_User),
+	CONSTRAINT FK_Administrateur_Utilisateur FOREIGN KEY(id_User) REFERENCES Utilisateur(id_User)
 )
 
 -- 3-) Table Etudiant
 CREATE TABLE Etudiant (
 	id_User INT NOT NULL,
-	statut_Etud VARCHAR(30) NOT NULL,
-	programme_Etud INT NOT NULL,
+	statut_Etud  VARCHAR (80) NOT NULL DEFAULT 'Inactif',
+	programme_Etud INT DEFAULT NULL,
 	CONSTRAINT PK_Etudiant PRIMARY KEY (id_User),
 	CONSTRAINT FK_Etudiant_Programme FOREIGN KEY(programme_Etud) REFERENCES Programme(id_Prog),
 	CONSTRAINT FK_Etudiant_Utilisateur FOREIGN KEY(id_User) REFERENCES Utilisateur(id_User)
@@ -286,7 +289,19 @@ CREATE TABLE CoursPrerequis (
 	CONSTRAINT CK_CoursPrerequis_id_Cours_Prerequis CHECK(id_Cours <> id_Prerequis) -- Vérifie qu'un cours ne soit son propre prerequis
 )
 
--- 7- Création de la table CoursOffert
+-- 7-) Création de la table Semestre
+
+CREATE TABLE Semestre (
+	id_Semest INT IDENTITY (1, 1),
+	nom_Semest VARCHAR(20) NOT NULL,
+	annee_Semest VARCHAR(20) NOT NULL,
+	datDeb_Semest DATE NOT NULL,
+	dateFin_Semest DATE,
+	CONSTRAINT UQ_Semestre_nom_annee UNIQUE(nom_Semest, annee_Semest),
+	CONSTRAINT PK_Semestre PRIMARY KEY(id_Semest)
+)
+
+-- 8- Création de la table CoursOffert
 
 CREATE TABLE CoursOffert (
 	id_CoursOf INT IDENTITY(1, 1),
@@ -298,21 +313,11 @@ CREATE TABLE CoursOffert (
 	dateFin_CoursOf DATE,
 	mondeEns_CoursOf VARCHAR(30) DEFAULT 'Présentiel',
 	id_Cours INT NOT NULL,
+	id_Semest INT NOT NULL,
 	CONSTRAINT CK_CoursOf_mondeEns_CoursOf CHECK (mondeEns_CoursOf IN ('Présentiel', 'Asynchrone', 'En ligne', 'Bimodal')),
 	CONSTRAINT PK_CoursOffert PRIMARY KEY(id_CoursOf),
-	CONSTRAINT FK_CoursOffert_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours)
-)
-
--- 8-) Création de la table Semestre
-
-CREATE TABLE Semestre (
-	id_Semest INT IDENTITY (1, 1),
-	nom_Semest VARCHAR(20) NOT NULL,
-	annee_Semest VARCHAR(20) NOT NULL,
-	datDeb_Semest DATE NOT NULL,
-	dateFin_Semest DATE,
-	CONSTRAINT UQ_Semestre_nom_annee UNIQUE(nom_Semest, annee_Semest),
-	CONSTRAINT PK_Semestre PRIMARY KEY(id_Semest)
+	CONSTRAINT FK_CoursOffert_Cours FOREIGN KEY(id_Cours) REFERENCES Cours(id_Cours),
+	CONSTRAINT FK_CoursOffert_Semestre FOREIGN KEY(id_Semest) REFERENCES Semestre(id_Semest)
 )
 
 -- 9) Création de la table SessionExamen
@@ -344,7 +349,7 @@ CREATE TABLE Evaluation (
 	type_Eval IN ('Intra', 'Quiz', 'Examen final')),
 	CONSTRAINT PK_Evaluation PRIMARY KEY(id_Eval),
 	CONSTRAINT FK_Evaluation_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
-	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam),
+	CONSTRAINT FK_Evaluation_SessionExamen FOREIGN KEY(id_SessExam) REFERENCES SessionExamen(id_SessExam)
 )
 
 -- 11-) Création de la table Professeur
@@ -390,7 +395,9 @@ CREATE TABLE Inscription (
 	CONSTRAINT PK_Inscription PRIMARY KEY(id_Inscript),
 	CONSTRAINT FK_Inscription_Etudiant FOREIGN KEY(id_Etud) REFERENCES Etudiant(id_User),
 	CONSTRAINT FK_Inscription_CoursOffert FOREIGN KEY(id_CoursOf) REFERENCES CoursOffert(id_CoursOf),
-	CONSTRAINT UQ_Inscription_id_Etud_id_CoursOf UNIQUE(id_Etud, id_CoursOf) -- Évite une double inscription au même cours offert
+	CONSTRAINT UQ_Inscription_id_Etud_id_CoursOf UNIQUE(id_Etud, id_CoursOf), -- Évite une double inscription au même cours offert
+	CONSTRAINT CK_Inscription_noteLet CHECK (noteLet_Inscript IS NULL OR noteLet_Inscript IN
+		('A+','A','A-','B+','B','B-','C+','C','C-','D+','D','E','F'))
 )
 -- 14 -) Création de la table Note
 
@@ -404,7 +411,9 @@ CREATE TABLE Note (
 	id_Eval INT NOT NULL,
 	CONSTRAINT PK_Note PRIMARY KEY(id_Note),
 	CONSTRAINT FK_Note_Inscription FOREIGN KEY(id_Inscript) REFERENCES Inscription(id_Inscript),
-	CONSTRAINT FK_Note_Evaluation FOREIGN KEY(id_Eval) REFERENCES Evaluation(id_Eval)
+	CONSTRAINT FK_Note_Evaluation FOREIGN KEY(id_Eval) REFERENCES Evaluation(id_Eval),
+	CONSTRAINT CK_Note_ValLettre CHECK (ValLettre_Note IN
+		('A+','A','A-','B+','B','B-','C+','C','C-','D+','D','E','F'))
 )
 
 -- 15) Création de la table Restreindre
@@ -486,6 +495,8 @@ Création des index après sur :
 */
 
 
+GO
+
 --- ####################################### Insertion dans les tables ##############################################
 
 -- 1 Insertion dans la table Programme x 10
@@ -520,30 +531,29 @@ VALUES
 
 
 
-INSERT INTO Utilisateur(nom_User, prenom_User, dateNais_User, numTel_User, courriel_User, adresse_User ) 
-VALUES 
-	('Dupont','Jean','2004-05-12','5141234567','jean.dupont@yahoo.com','Montréal'),
-	('Heumen','Gaius','1999-08-08','5811234567','gaius@gmail.com','Montréal'),
-	('Martin','Paul','2003-01-10','4381112222','paul.martin@gmail.com','Laval'),
-	('Nguyen','Lan','2002-07-21','5143334444','lan.nguyen@gmail.com','Montréal'),
-	('Roy','Sophie','2001-12-30','4505556666','sophie.roy@gmail.com','Longueuil'),
-	('Smith','John','2000-03-15','8197778888','john.smith@gmail.com','Gatineau'),
-	('Diallo','Aminata','2004-09-09','5149990000','aminata@gmail.com','Montréal'),
-	('Chen','Li','2003-11-11','4382223333','li.chen@gmail.com','Montréal'),
-	('Garcia','Luis','2002-06-06','4504445555','luis@gmail.com','Brossard'),
-	('Tremblay','Marc','2001-02-02','4186667777','marc@gmail.com','Québec'),
-	('Durand','Pierre','1975-05-05','5141111111','p.durand@gmail.com','Montréal'),
-	('Lefevre','Claire','1980-02-02','5142222222','c.lefevre@gmail.com','Montréal'),
-	('Smith','Robert','1970-03-03','8193333333','r.smith@gmail.com','Gatineau'),
-	('Khan','Ali','1985-04-04','4504444444','ali.khan@gmail.com','Laval'),
-	('Dubois','Marie','1978-06-06','4185555555','m.dubois@gmail.com','Québec'),
-	('Nguyen','Minh','1982-07-07','5146666666','minh@gmail.com','Montréal'),
-	('Roy','Luc','1969-08-08','5147777777','luc.roy@gmail.com','Montréal'),
-	('Garcia','Ana','1983-09-09','4388888888','ana@gmail.com','Montréal'),
-	('Chen','Wei','1977-10-10','5149999999','wei@gmail.com','Montréal'),
-	('Diallo','Moussa','1981-11-11','5140000000','moussa@gmail.com','Montréal');
-
-
+INSERT INTO Utilisateur(nom_User, prenom_User, dateNais_User, numTel_User, courriel_User, adresse_User, passwordHash_User)
+VALUES
+	('Dupont','Jean','2004-05-12','5141234567','jean.dupont@yahoo.com','Montréal', NULL),
+	('Heumen','Gaius','1999-08-08','5811234567','gaius@gmail.com','Montréal', NULL),
+	('Martin','Paul','2003-01-10','4381112222','paul.martin@gmail.com','Laval', NULL),
+	('Nguyen','Lan','2002-07-21','5143334444','lan.nguyen@gmail.com','Montréal', NULL),
+	('Roy','Sophie','2001-12-30','4505556666','sophie.roy@gmail.com','Longueuil', NULL),
+	('Smith','John','2000-03-15','8197778888','john.smith@gmail.com','Gatineau', NULL),
+	('Diallo','Aminata','2004-09-09','5149990000','aminata@gmail.com','Montréal', NULL),
+	('Chen','Li','2003-11-11','4382223333','li.chen@gmail.com','Montréal', NULL),
+	('Garcia','Luis','2002-06-06','4504445555','luis@gmail.com','Brossard', NULL),
+	('Tremblay','Marc','2001-02-02','4186667777','marc@gmail.com','Québec', NULL),
+	('Durand','Pierre','1975-05-05','5141111111','p.durand@gmail.com','Montréal', NULL),
+	('Lefevre','Claire','1980-02-02','5142222222','c.lefevre@gmail.com','Montréal', NULL),
+	('Smith','Robert','1970-03-03','8193333333','r.smith@gmail.com','Gatineau', NULL),
+	('Khan','Ali','1985-04-04','4504444444','ali.khan@gmail.com','Laval', NULL),
+	('Dubois','Marie','1978-06-06','4185555555','m.dubois@gmail.com','Québec', NULL),
+	('Nguyen','Minh','1982-07-07','5146666666','minh@gmail.com','Montréal', NULL),
+	('Roy','Luc','1969-08-08','5147777777','luc.roy@gmail.com','Montréal', NULL),
+	('Garcia','Ana','1983-09-09','4388888888','ana@gmail.com','Montréal', NULL),
+	('Chen','Wei','1977-10-10','5149999999','wei@gmail.com','Montréal', NULL),
+	('Diallo','Moussa','1981-11-11','5140000000','moussa@gmail.com','Montréal', NULL),
+	('Baida','Imad','2000-01-01','5140000001','imadbaida+admin@gmail.com','Montréal', '$2a$11$umjIYDnLW4QafMegDFjrvu1AreuUb6V3UDCKwT/j7t61oCx1dqtzW');
 
 INSERT INTO Etudiant
 (id_User, statut_Etud, programme_Etud)
@@ -557,7 +567,8 @@ INSERT INTO Administrateur
 	(id_User, role_Admin_Etud)
 VALUES
 	(104, 'Gestionnaire du site'),
-	(108, 'Administrateur d''applications')
+	(108, 'Administrateur d''applications'),
+	(120, 'Administrateur');
 -- 4- Insertion dans la table ChoixSpecialisation x 16
 INSERT INTO ChoixSpecialisation
 	(date_ChoixSpec, nb_ChoixSpec, id_Etud, id_Spec)
@@ -616,18 +627,18 @@ VALUES
 	('Hiver','2027','2027-01-10','2027-04-20');
 
 -- 10- Insertion dans la table CoursOffert x 10
-INSERT INTO CoursOffert(capacite_CoursOf, horaire_CoursOf, salle_CoursOf, dateDeb_CoursOf, dateFin_CoursOf, id_Cours)
+INSERT INTO CoursOffert(capacite_CoursOf, horaire_CoursOf, salle_CoursOf, dateDeb_CoursOf, dateFin_CoursOf, id_Cours, id_Semest)
 VALUES
-	(40,'Lun 09H-12H','A101','2024-01-10','2024-04-20',1),
-	(35,'Mar 09H-12H','A102','2024-01-10','2024-04-20',2),
-	(30,'Mer 09H-12H','A103','2024-01-10','2024-04-20',3),
-	(25,'Jeu 09H-12H','A104','2024-01-10','2024-04-20',4),
-	(40,'Ven 09H-12H','A105','2024-01-10','2024-04-20',5),
-	(30,'Lun 13H-16H','B101','2024-01-10','2024-04-20',6),
-	(30,'Mar 13H-16H','B102','2024-01-10','2024-04-20',7),
-	(25,'Mer 13H-16H','B103','2024-01-10','2024-04-20',8),
-	(30,'Jeu 13H-16H','B104','2024-01-10','2024-04-20',9),
-	(20,'Ven 13H-16H','B105','2024-01-10','2024-04-20',10);
+	(40,'Lun 09H-12H','A101','2024-01-10','2024-04-20',1,1),
+	(35,'Mar 09H-12H','A102','2024-01-10','2024-04-20',2,1),
+	(30,'Mer 09H-12H','A103','2024-01-10','2024-04-20',3,1),
+	(25,'Jeu 09H-12H','A104','2024-01-10','2024-04-20',4,2),
+	(40,'Ven 09H-12H','A105','2024-01-10','2024-04-20',5,2),
+	(30,'Lun 13H-16H','B101','2024-01-10','2024-04-20',6,3),
+	(30,'Mar 13H-16H','B102','2024-01-10','2024-04-20',7,3),
+	(25,'Mer 13H-16H','B103','2024-01-10','2024-04-20',8,4),
+	(30,'Jeu 13H-16H','B104','2024-01-10','2024-04-20',9,4),
+	(20,'Ven 13H-16H','B105','2024-01-10','2024-04-20',10,5);
 
 
 -- 11- Insertion dans la table Inscription x 10

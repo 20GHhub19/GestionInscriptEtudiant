@@ -1,0 +1,74 @@
+@page
+@model GestionUnivApp.Areas.Identity.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Creer un compte";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">Creer un compte</h2>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <form method="post" class="border p-4 rounded shadow-sm bg-light">
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label">Courriel</label>
+                <input asp-for="Input.Email" class="form-control" type="email" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Password" class="form-label">Mot de passe</label>
+                <input asp-for="Input.Password" type="password" class="form-control" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <hr />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.NomUser" class="form-label">Nom</label>
+                    <input asp-for="Input.NomUser" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.PrenomUser" class="form-label">Prenom</label>
+                    <input asp-for="Input.PrenomUser" class="form-control" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.DateNaisUser" class="form-label">Date de naissance</label>
+                <input asp-for="Input.DateNaisUser" type="date" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.AdresseUser" class="form-label">Adresse</label>
+                <input asp-for="Input.AdresseUser" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.NumTelUser" class="form-label">Telephone</label>
+                <input asp-for="Input.NumTelUser" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-3">Creer le compte</button>
+        </form>
+
+        <p class="text-center mt-3">
+            Deja inscrit? <a asp-page="Login">Se connecter</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,14 +1,38 @@
-﻿namespace GestionUnivApp.Models
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
+namespace GestionUnivApp.Models;
+
+[Table("Enseigner")]
+public partial class Enseigner
 {
-    public class Enseigner
-    {
-        public int Id_Enseigner { get; set; }
-        public int NbH_Enseigner { get; set; }
-        public DateTime? DateDeb_Enseigner { get; set; }
-        public DateTime? DateFin_Enseigner { get; set; }
-        public int Id_Prof { get; set; }
-        public Professeur Professeur { get; set; } = null!;
-        public int Id_CoursOf { get; set; }
-        public CoursOffert CoursOffert { get; set; } = null!;
-    }
+    [Key]
+    [Column("id_Enseigner")]
+    public int IdEnseigner { get; set; }
+
+    [Column("nbH_Enseigner")]
+    public int NbHEnseigner { get; set; }
+
+    [Column("datDeb_Enseigner")]
+    public DateOnly? DatDebEnseigner { get; set; }
+
+    [Column("dateFin_Enseigner")]
+    public DateOnly? DateFinEnseigner { get; set; }
+
+    [Column("id_Prof")]
+    public int IdProf { get; set; }
+
+    [Column("id_CoursOf")]
+    public int IdCoursOf { get; set; }
+
+    [ForeignKey("IdCoursOf")]
+    [InverseProperty("Enseigners")]
+    public virtual CoursOffert IdCoursOfNavigation { get; set; } = null!;
+
+    [ForeignKey("IdProf")]
+    [InverseProperty("Enseigners")]
+    public virtual Professeur IdProfNavigation { get; set; } = null!;
 }

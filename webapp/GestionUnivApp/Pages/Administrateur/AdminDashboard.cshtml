@@ -1,0 +1,242 @@
+@page
+@model GestionUnivApp.Pages.Administrateur.AdminDashboardModel
+@{
+    ViewData["Title"] = "Administration";
+}
+
+<h2 class="mb-4">Tableau de bord administrateur</h2>
+
+<a class="btn btn-primary mb-4 me-2" asp-page="GestionUtilisateurs">Gestion des utilisateurs et roles</a>
+<a class="btn btn-success mb-4" asp-page="AffectationCours">Affectation des cours aux professeurs</a>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="fw-bold text-primary">@Model.NbEtudiants</h3>
+                <p class="text-muted mb-0">Etudiants</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="fw-bold text-success">@Model.NbProfesseurs</h3>
+                <p class="text-muted mb-0">Professeurs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="fw-bold text-info">@Model.NbCours</h3>
+                <p class="text-muted mb-0">Cours</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="fw-bold text-warning">@Model.NbProgrammes</h3>
+                <p class="text-muted mb-0">Programmes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="fw-bold text-danger">@Model.NbInscriptions</h3>
+                <p class="text-muted mb-0">Inscriptions</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Programmes -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0">Programmes</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Code</th>
+                        <th>Nom</th>
+                        <th>Credits</th>
+                        <th>Duree</th>
+                        <th>Nb etudiants</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var prog in Model.Programmes)
+                    {
+                        <tr>
+                            <td><strong>@prog.CodeProg</strong></td>
+                            <td>@prog.NomProg</td>
+                            <td>@prog.NbCreditProg</td>
+                            <td>@(prog.DureeProg) ans</td>
+                            <td><span class="badge bg-primary">@prog.Etudiants.Count</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Etudiants -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Liste des etudiants</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Matricule</th>
+                                <th>Nom</th>
+                                <th>Programme</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var etud in Model.Etudiants)
+                            {
+                                <tr>
+                                    <td>@etud.User.MatUser</td>
+                                    <td>@etud.User.PrenomUser @etud.User.NomUser</td>
+                                    <td>@(etud.NomProgramme ?? "—")</td>
+                                    <td>
+                                        <span class="badge @(etud.Etudiant.StatutEtud == "Actif" ? "bg-success" : "bg-secondary")">
+                                            @etud.Etudiant.StatutEtud
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Professeurs -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Liste des professeurs</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Nom</th>
+                                <th>Grade</th>
+                                <th>Cours</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var prof in Model.Professeurs)
+                            {
+                                <tr>
+                                    <td>@prof.User.PrenomUser @prof.User.NomUser</td>
+                                    <td>@prof.Prof.GradeProf</td>
+                                    <td><span class="badge bg-info">@prof.NbCours</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top moyennes (lu depuis la vue SQL v_MoyenneFinaleEtudiant) -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Top 10 des moyennes (vue <code>v_MoyenneFinaleEtudiant</code>)</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Rang</th>
+                        <th>Matricule</th>
+                        <th>Nom</th>
+                        <th>Nb cours</th>
+                        <th class="text-end">Moyenne generale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int rang = 1; }
+                    @foreach (var m in Model.TopMoyennes)
+                    {
+                        <tr>
+                            <td><strong>@rang</strong></td>
+                            <td>@m.MatUser</td>
+                            <td>@m.PrenomUser @m.NomUser</td>
+                            <td><span class="badge bg-secondary">@m.NbCoursSuivis</span></td>
+                            <td class="text-end">
+                                <strong>@(m.MoyenneGenerale?.ToString("0.00") ?? "—")</strong> / 20
+                            </td>
+                        </tr>
+                        rang++;
+                    }
+                    @if (!Model.TopMoyennes.Any())
+                    {
+                        <tr><td colspan="5" class="text-center text-muted">Aucune donnee</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Dernieres inscriptions -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Dernieres inscriptions</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Etudiant</th>
+                        <th>Cours</th>
+                        <th>Statut</th>
+                        <th>Decision</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var insc in Model.DernieresInscriptions)
+                    {
+                        var user = insc.IdEtudNavigation?.IdUserNavigation;
+                        var cours = insc.IdCoursOfNavigation?.IdCoursNavigation;
+                        <tr>
+                            <td>@insc.DateInscript?.ToString("yyyy-MM-dd")</td>
+                            <td>@user?.PrenomUser @user?.NomUser</td>
+                            <td>@cours?.CodeCours - @cours?.NomCours</td>
+                            <td>
+                                <span class="badge @(insc.StatutInscript == "Inscrit" ? "bg-success" : "bg-warning text-dark")">
+                                    @insc.StatutInscript
+                                </span>
+                            </td>
+                            <td>@(insc.DecisionFiInscript ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
